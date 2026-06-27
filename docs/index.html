@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Your Sherpa Gen 3 — BRS Offroad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0E0F0C; }
+  body { font-family: 'Inter', sans-serif; color: #F3EEE2; overflow-x: hidden; }
+  ::selection { background: #A9895D; color: #0E0F0C; }
+  ::placeholder { color: #6f7166; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0E0F0C; }
+  ::-webkit-scrollbar-thumb { background: #34362F; border-radius: 6px; }
+  input, textarea, select { font-family: 'Inter', sans-serif; }
+
+  @keyframes brsFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .brs-step { animation: brsFade .35s ease both; }
+
+  button { font-family: inherit; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #A9895D; outline-offset: 2px; }
+
+  /* Topo background */
+  #topo-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      repeating-radial-gradient(circle at 16% 10%, transparent 0 46px, rgba(200,185,154,0.045) 46px 47px, transparent 47px 96px),
+      repeating-radial-gradient(circle at 86% 82%, transparent 0 56px, rgba(95,107,79,0.05) 56px 57px, transparent 57px 116px);
+  }
+
+  /* Header */
+  #header {
+    position: sticky; top: 0; z-index: 60;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    padding: 16px 32px;
+    background: rgba(14,15,12,0.86); backdrop-filter: blur(10px);
+    border-bottom: 1px solid #1F211C;
+  }
+  #header-left { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+  #header-left img { height: 22px; width: auto; display: block; }
+  #header-divider { width: 1px; height: 26px; background: #34362F; }
+  #header-label { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .2em; font-size: 12px; color: #A9895D; }
+  #header-price-wrap { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+  #header-price-label { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: #C8B99A; margin-bottom: 3px; }
+  #header-price-val { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: .02em; color: #F3EEE2; }
+
+  /* Progress bar */
+  #progress-bar {
+    position: relative; z-index: 5;
+    display: flex; align-items: center; gap: 8px; overflow-x: auto;
+    padding: 14px 32px; border-bottom: 1px solid #1F211C; background: #0E0F0C;
+    scrollbar-width: none;
+  }
+  #progress-bar::-webkit-scrollbar { display: none; }
+  .prog-item { display: flex; align-items: center; gap: 9px; cursor: pointer; flex-shrink: 0; padding-right: 4px; }
+  .prog-item:hover .prog-label { color: #F3EEE2; }
+  .prog-dot {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 13px; flex-shrink: 0;
+    transition: all .15s;
+  }
+  .prog-label { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 13px; transition: color .15s; }
+  .prog-sep { width: 26px; height: 1px; background: #34362F; margin: 0 2px; flex-shrink: 0; }
+
+  /* Config layout */
+  #config-layout {
+    position: relative; z-index: 5; max-width: 1320px; margin: 0 auto;
+    padding: 36px 32px 96px;
+    display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;
+  }
+
+  /* Rail */
+  #rail {
+    position: sticky; top: 104px;
+    flex: 1 1 460px; min-width: 340px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  #preview-box {
+    position: relative; border-radius: 16px; overflow: hidden;
+    border: 1px solid #34362F;
+    background: radial-gradient(120% 90% at 50% 16%, #2a2c26 0%, #131409 74%);
+    aspect-ratio: 16/11;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  }
+  #preview-wash { position: absolute; inset: 0; transition: background .4s ease; }
+  #preview-img { position: absolute; inset: 0; z-index: 2; background-position: center; background-size: cover; background-repeat: no-repeat; transition: background-image .25s ease; }
+  #preview-placeholder { position: relative; z-index: 2; width: 535px; height: 282px; border-radius: 12px; border: 1px dashed #4a4c43; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 11px, transparent 11px 22px); display: flex; align-items: center; justify-content: center; text-align: center; }
+  #preview-placeholder span { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #9a9c8f; padding: 0 14px; }
+
+  /* At-a-glance */
+  #glance { display: flex; gap: 12px; }
+  .glance-card { flex: 1; display: flex; align-items: center; gap: 11px; background: #1F211C; border: 1px solid #34362F; border-radius: 10px; padding: 12px 14px; }
+  .glance-swatch { width: 30px; height: 30px; border-radius: 7px; border: 1px solid #4a4c43; flex-shrink: 0; }
+  .glance-lbl-sm { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .12em; font-size: 10px; color: #8B9478; }
+  .glance-lbl-lg { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; color: #F3EEE2; }
+
+  /* Pricing card */
+  #pricing-card { background: #1F211C; border: 1px solid #34362F; border-radius: 12px; overflow: hidden; }
+  .price-row { display: flex; justify-content: space-between; align-items: baseline; }
+  #pricing-disclaimer { font-size: 11px; line-height: 1.5; color: #6f7166; margin: 0; }
+
+  /* Step content */
+  #step-content { flex: 1 1 420px; min-width: 320px; display: flex; flex-direction: column; gap: 22px; }
+
+  /* Option cards */
+  .opt-card {
+    position: relative; background: #1F211C; border: 1px solid #34362F;
+    border-radius: 12px; padding: 16px; cursor: pointer;
+  }
+  .opt-card.selected::before {
+    content: ''; position: absolute; inset: 0;
+    border: 2px solid #A9895D; background: rgba(169,137,93,0.12);
+    border-radius: 12px; pointer-events: none;
+  }
+  .opt-check {
+    position: absolute; top: 10px; right: 10px; z-index: 2;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #5F6B4F; color: #F3EEE2;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+  }
+  .opt-swatch { position: relative; width: 100%; aspect-ratio: 3/2; border-radius: 8px; border: 1px solid #4a4c43; margin-bottom: 12px; }
+  .opt-name { position: relative; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; font-size: 18px; color: #F3EEE2; }
+  .opt-price-incl { position: relative; font-size: 12px; color: #8B9478; }
+
+  /* Horizontal option cards (add-ons) */
+  .addon-card {
+    position: relative; background: #1F211C; border: 1px solid #34362F;
+    border-radius: 12px; padding: 18px; cursor: pointer;
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  .addon-card.selected::before {
+    content: ''; position: absolute; inset: 0;
+    border: 2px solid #A9895D; background: rgba(169,137,93,0.12);
+    border-radius: 12px; pointer-events: none;
+  }
+  .addon-thumb { position: relative; width: 78px; height: 78px; flex-shrink: 0; border-radius: 8px; border: 1px solid #4a4c43; background: #fff; background-position: center; background-size: cover; background-repeat: no-repeat; }
+  .addon-body { position: relative; flex: 1; }
+  .addon-header { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .addon-name { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .04em; font-size: 19px; color: #F3EEE2; }
+  .addon-price { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; color: #A9895D; white-space: nowrap; }
+  .addon-desc { font-size: 13.5px; color: #C8B99A; line-height: 1.5; margin: 6px 0 0; }
+  .addon-chip { position: relative; align-self: center; }
+  .chip-add { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; padding: 7px 13px; border-radius: 5px; white-space: nowrap; background: transparent; color: #C8B99A; border: 1px solid #34362F; }
+  .chip-added { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; padding: 7px 13px; border-radius: 5px; white-space: nowrap; background: #5F6B4F; color: #F3EEE2; border: 1px solid #5F6B4F; }
+  .chip-sel { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; padding: 7px 13px; border-radius: 5px; white-space: nowrap; background: #5F6B4F; color: #F3EEE2; border: 1px solid #5F6B4F; }
+  .chip-unsel { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; padding: 7px 13px; border-radius: 5px; white-space: nowrap; background: transparent; color: #C8B99A; border: 1px solid #34362F; }
+
+  /* Rec note */
+  .rec-note { display: flex; gap: 12px; align-items: flex-start; background: rgba(214,181,109,0.08); border: 1px solid rgba(214,181,109,0.4); border-radius: 10px; padding: 14px 16px; margin-top: 16px; }
+  .rec-note-icon { color: #D6B56D; font-size: 18px; line-height: 1; }
+  .rec-note p { margin: 0; font-size: 13px; color: #D6B56D; line-height: 1.5; }
+  .rec-note strong { font-family: 'Barlow Condensed', sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+
+  .inline-rec { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+  .inline-rec-star { color: #D6B56D; font-size: 11px; line-height: 1; }
+  .inline-rec-txt { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; color: #D6B56D; }
+
+  /* Pill buttons (heated upgrade) */
+  .pill { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; font-size: 13px; padding: 10px 14px; border-radius: 6px; cursor: pointer; border: 1px solid; }
+  .pill-active { background: rgba(169,137,93,0.16); color: #F3EEE2; border-color: #A9895D; }
+  .pill-inactive { background: #1F211C; color: #C8B99A; border-color: #34362F; }
+  .pill-disabled { background: #16170F; color: #5b5d53; border-color: #34362F; cursor: not-allowed; }
+
+  /* Nav buttons */
+  .btn-back { background: transparent; color: #F3EEE2; border: 1px solid #34362F; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 16px; padding: 13px 24px; border-radius: 6px; }
+  .btn-next { background: #A9895D; color: #0E0F0C; border: none; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 16px; font-weight: 600; padding: 13px 34px; border-radius: 6px; transition: background .15s; }
+  .btn-next:hover { background: #927449; }
+  .btn-primary { background: #A9895D; color: #0E0F0C; border: none; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 16px; font-weight: 600; padding: 15px 20px; border-radius: 6px; transition: background .15s; width: 100%; }
+  .btn-primary:hover { background: #927449; }
+  .btn-secondary { background: #5F6B4F; color: #F3EEE2; border: none; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 16px; padding: 15px 20px; border-radius: 6px; width: 100%; }
+  .btn-outline { background: transparent; color: #F3EEE2; border: 1px solid #C8B99A; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .08em; font-size: 16px; padding: 15px 20px; border-radius: 6px; width: 100%; }
+
+  /* Form fields */
+  .field-label { font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: .1em; font-size: 12px; color: #8B9478; }
+  .field-input { background: #1F211C; border: 1px solid #34362F; border-radius: 7px; padding: 12px 13px; color: #F3EEE2; font-size: 15px; outline: none; width: 100%; }
+  .field-input:focus { border-color: #A9895D; }
+
+  /* Mobile bar */
+  #mobile-bar {
+    display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+    align-items: center; justify-content: space-between; gap: 14px; padding: 14px 20px;
+    background: rgba(14,15,12,0.95); backdrop-filter: blur(10px);
+    border-top: 1px solid #34362F;
+  }
+  #mobile-detail-overlay { display: none; position: fixed; inset: 0; z-index: 65; background: rgba(0,0,0,0.5); align-items: flex-end; }
+  #mobile-detail-panel { width: 100%; background: #1F211C; border-top: 1px solid #34362F; border-radius: 14px 14px 0 0; padding: 22px; margin-bottom: 72px; }
+
+  @media (max-width: 940px) {
+    #rail { position: static !important; }
+    #mobile-bar { display: flex !important; }
+    .brs-footpad { height: 76px; }
+  }
+  @media (max-width: 600px) {
+    #config-layout { padding: 24px 16px 96px; }
+    #header { padding: 14px 16px; }
+    #progress-bar { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="topo-bg"></div>
+
+<header id="header">
+  <div id="header-left">
+    <img src="assets/brs-wordmark-white.png" alt="BRS Offroad">
+    <div id="header-divider"></div>
+    <span id="header-label">Sherpa Gen 3 Builder</span>
+  </div>
+  <div id="header-price-wrap" style="display:none">
+    <div style="text-align:right;line-height:1">
+      <div id="header-price-label">Estimated Build Price</div>
+      <div id="header-price-val">$69,990</div>
+    </div>
+  </div>
+</header>
+
+<!-- Progress -->
+<div id="progress-bar" style="display:none"></div>
+
+<!-- ============ INTRO ============ -->
+<section id="screen-intro" class="brs-step" style="position:relative;z-index:5;max-width:1200px;margin:0 auto;padding:64px 32px 80px">
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:center">
+    <div style="flex:1 1 420px;min-width:300px">
+      <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.22em;font-size:14px;color:#A9895D;margin-bottom:18px">ADVENTURE AWAITS</div>
+      <h1 style="font-family:'Bebas Neue',sans-serif;font-size:84px;line-height:.9;letter-spacing:.02em;margin:0 0 24px;color:#F3EEE2">Build Your<br>Sherpa Gen 3</h1>
+      <p style="font-size:17px;line-height:1.65;color:#C8B99A;max-width:540px;margin:0 0 32px">Design your Sherpa Gen 3 around the way you travel. Choose your exterior finish, interior leather, power setup, comfort upgrades, kitchen configuration, and additional features. As you build, you'll review your selected options, see your estimated build price, and save your build so the BRS Offroad team or your closest dealer can help you take the next step.</p>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:24px">
+        <button id="btn-start" class="btn-next" style="font-size:19px;padding:16px 40px">Start Building</button>
+        <div style="line-height:1.1">
+          <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:#8B9478;margin-bottom:4px">Starting MSRP</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:#F3EEE2">$69,990</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1 1 420px;min-width:300px">
+      <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid #34362F;background:radial-gradient(120% 90% at 50% 18%, #2a2c26 0%, #131409 72%);aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+        <div style="position:absolute;inset:0;background:radial-gradient(58% 48% at 50% 62%, rgba(200,185,154,0.18), transparent 72%)"></div>
+        <div style="position:relative;width:100%;height:100%;background:url('4-mqvc4jau.jpg') center/cover no-repeat"></div>
+        <div style="position:absolute;bottom:20px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:14px;color:#C8B99A">PREMIUM OFF-GRID ADVENTURE CAMPER TRAILER</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONFIG ============ -->
+<div id="screen-config" style="display:none">
+  <div id="config-layout">
+    <!-- LEFT RAIL -->
+    <div id="rail">
+      <div id="preview-box">
+        <div id="preview-wash"></div>
+        <div id="preview-img" style="display:none"></div>
+        <div id="preview-placeholder">
+          <span id="preview-placeholder-text">/assets/sherpa/exterior/tan.png</span>
+        </div>
+      </div>
+
+      <div id="glance">
+        <div class="glance-card">
+          <div id="glance-ext-swatch" class="glance-swatch"></div>
+          <div>
+            <div class="glance-lbl-sm">Exterior</div>
+            <div id="glance-ext-label" class="glance-lbl-lg">Tan</div>
+          </div>
+        </div>
+        <div class="glance-card">
+          <div id="glance-int-swatch" class="glance-swatch"></div>
+          <div>
+            <div class="glance-lbl-sm">Interior</div>
+            <div id="glance-int-label" class="glance-lbl-lg">Dark Brown</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pricing-card">
+        <div style="padding:16px 18px;border-bottom:1px solid #34362F">
+          <div class="price-row" style="margin-bottom:9px">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:#C8B99A">Starting MSRP</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#F3EEE2">$69,990</span>
+          </div>
+          <div class="price-row">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:#C8B99A">Selected Add-Ons</span>
+            <span id="rail-addons-total" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#A9895D">$0</span>
+          </div>
+        </div>
+        <div id="rail-addons-list" style="display:none;padding:12px 18px;border-bottom:1px solid #34362F;display:none;flex-direction:column;gap:9px"></div>
+        <div style="padding:16px 18px;background:#16170F;display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:14px;color:#F3EEE2">Estimated Build Price</span>
+          <span id="rail-estimated" style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#A9895D">$69,990</span>
+        </div>
+      </div>
+      <p id="pricing-disclaimer">Estimated build price is based on starting MSRP and selected add-ons. Final pricing, availability, taxes, freight, dealer fees, installation, regional pricing, and configuration details may vary. A BRS Offroad representative or authorized dealer will confirm the final build price.</p>
+    </div>
+
+    <!-- RIGHT STEP CONTENT -->
+    <div id="step-content">
+
+      <!-- EXTERIOR -->
+      <div id="step-exterior" class="brs-step" style="display:none">
+        <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 01 · Finish</div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Choose Your Exterior Finish</h2>
+        <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">All exterior color options are included at no additional cost.</p>
+        <div id="exterior-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"></div>
+      </div>
+
+      <!-- INTERIOR -->
+      <div id="step-interior" class="brs-step" style="display:none">
+        <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 02 · Cabin</div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Choose Your Interior Leather</h2>
+        <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">All leather color options are included at no additional cost.</p>
+        <div id="leather-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px"></div>
+      </div>
+
+      <!-- COMFORT -->
+      <div id="step-comfort" class="brs-step" style="display:none">
+        <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 03 · Climate</div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Comfort &amp; Climate</h2>
+        <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">Add comfort-focused upgrades to make your Sherpa more capable across different climates and travel conditions.</p>
+        <div class="addon-card" id="ac-card">
+          <div class="addon-thumb" style="background-image:url('assets/dometic-ac.webp');background-size:contain"></div>
+          <div class="addon-body">
+            <div class="addon-header">
+              <span class="addon-name">Dometic Air Conditioner</span>
+              <span class="addon-price">+$2,735.00</span>
+            </div>
+            <p class="addon-desc">Stay comfortable in warmer climates with added air conditioning designed to help keep the cabin cool when temperatures rise.</p>
+          </div>
+          <div class="addon-chip"><span id="ac-chip" class="chip-add">Add</span></div>
+        </div>
+        <div id="ac-rec-note" class="rec-note" style="display:none">
+          <span class="rec-note-icon">⚠</span>
+          <p><strong>Recommended:</strong> For heavier electrical use, BRS recommends pairing this upgrade with additional battery or inverter capacity.</p>
+        </div>
+      </div>
+
+      <!-- KITCHEN -->
+      <div id="step-kitchen" class="brs-step" style="display:none">
+        <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 04 · Galley</div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Choose Your Kitchen Setup</h2>
+        <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">Choose the cooking setup that best fits the way you camp. Only one kitchen setup can be selected.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="addon-card selected" id="propane-card">
+            <div class="addon-thumb" style="background:#0E0F0C;background-image:url('assets/propane-cooktop.jpg')"></div>
+            <div class="addon-body">
+              <div class="addon-header">
+                <span class="addon-name">Standard 2-Burner Propane Cooktop</span>
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#8B9478;white-space:nowrap">Included</span>
+              </div>
+              <p class="addon-desc">Included with the Sherpa Gen 3.</p>
+            </div>
+            <div class="addon-chip"><span id="propane-chip" class="chip-sel">Selected</span></div>
+          </div>
+          <div class="addon-card" id="induction-card">
+            <div class="addon-thumb" style="background:#0E0F0C;background-image:url('assets/induction-cooktop.webp')"></div>
+            <div class="addon-body">
+              <div class="addon-header">
+                <span class="addon-name">SUMMIT 12" 2-Zone Induction Cooktop</span>
+                <span class="addon-price">+$95.00</span>
+              </div>
+              <!-- NOTE: induction cooktop price ($95) is isolated here so BRS can revise it easily -->
+              <p class="addon-desc">Upgrade from the standard 2-burner propane cooktop to a clean electric induction cooking setup with two cooking zones. This replaces the standard propane cooktop.</p>
+            </div>
+            <div class="addon-chip"><span id="induction-chip" class="chip-unsel">Select</span></div>
+          </div>
+        </div>
+        <div id="induction-rec-note" class="rec-note" style="display:none">
+          <span class="rec-note-icon">⚠</span>
+          <p><strong>Recommended:</strong> For heavier electrical use, BRS recommends pairing this upgrade with additional battery or inverter capacity.</p>
+        </div>
+      </div>
+
+      <!-- POWER -->
+      <div id="step-power" class="brs-step" style="display:none">
+        <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 05 · Off-Grid Power</div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Set Up Your Off-Grid Power</h2>
+        <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">Customize your Sherpa's power system for longer trips, larger electrical loads, and more flexibility off the grid.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- Inverter -->
+          <div class="addon-card" id="inverter-card">
+            <div class="addon-thumb" style="background-image:url('assets/kisae-inverter.webp')"></div>
+            <div class="addon-body">
+              <div class="addon-header">
+                <span class="addon-name">KISAE 3000W Pure Sine Inverter</span>
+                <span class="addon-price">+$950.00</span>
+              </div>
+              <p class="addon-desc">Add more off-grid power flexibility with a 3000W pure sine inverter designed to support larger electrical loads and everyday camping essentials.</p>
+              <div id="inverter-rec" class="inline-rec" style="display:none">
+                <span class="inline-rec-star">★</span>
+                <span id="inverter-rec-text" class="inline-rec-txt"></span>
+              </div>
+            </div>
+            <div class="addon-chip"><span id="inverter-chip" class="chip-add">Add</span></div>
+          </div>
+          <!-- Second Battery -->
+          <div class="addon-card" id="battery2-card">
+            <div class="addon-thumb" style="background-image:url('assets/battleborn-battery.webp')"></div>
+            <div class="addon-body">
+              <div class="addon-header">
+                <span class="addon-name">Second 270Ah GC3 LiFePO4 Battery</span>
+                <span class="addon-price">+$2,390.00</span>
+              </div>
+              <p class="addon-desc">Increase your onboard power capacity for longer off-grid stays, extended appliance use, and more time away from hookups.</p>
+              <div id="battery2-rec" class="inline-rec" style="display:none">
+                <span class="inline-rec-star">★</span>
+                <span id="battery2-rec-text" class="inline-rec-txt"></span>
+              </div>
+            </div>
+            <div class="addon-chip"><span id="battery2-chip" class="chip-add">Add</span></div>
+          </div>
+          <!-- Heated Upgrade -->
+          <div class="addon-card" style="cursor:default">
+            <div class="addon-thumb" style="background-image:url('assets/heated-battery.jpeg')"></div>
+            <div class="addon-body">
+              <div class="addon-header">
+                <span class="addon-name">Heated Battery Upgrade</span>
+                <span class="addon-price">+$375.00 / battery</span>
+              </div>
+              <p class="addon-desc" style="margin-bottom:14px">Upgrade your 270Ah GC3 Smart LiFePO4 battery for improved cold-weather performance — ideal for colder climates or trips where battery temperature management matters.</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <div id="heated-0" class="pill">No Upgrade</div>
+                <div id="heated-1" class="pill">Upgrade 1 Battery · +$375</div>
+                <div id="heated-2" class="pill pill-disabled">Upgrade 2 Batteries · +$750</div>
+              </div>
+              <p id="heated-lock-msg" style="font-size:12px;color:#8B9478;margin:10px 0 0;display:none">Add the second 270Ah battery above to enable the two-battery heated upgrade.</p>
+            </div>
+          </div>
+        </div>
+        <div id="power-rec-note" class="rec-note" style="display:none">
+          <span class="rec-note-icon">⚠</span>
+          <p><strong>Recommended:</strong> For heavier electrical use, BRS recommends pairing this upgrade with additional battery or inverter capacity.</p>
+        </div>
+      </div>
+
+      <!-- TOW -->
+      <div id="step-tow" class="brs-step" style="display:none">
+        <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 06 · Tow Setup</div>
+        <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Confirm Your Tow Setup</h2>
+        <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">The Sherpa Gen 3 comes standard with a U.S. 7-Way Round RV Trailer Connection. If your tow vehicle requires a different trailer plug setup, BRS can outfit your camper with the appropriate connection.</p>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="addon-card selected" id="trailer-std-card" style="align-items:center">
+            <div class="addon-body">
+              <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Standard U.S. 7-Way Round RV Connection</div>
+              <p class="addon-desc">The standard configuration for the Sherpa Gen 3.</p>
+            </div>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#8B9478;flex-shrink:0">No additional cost</span>
+          </div>
+          <div class="addon-card" id="trailer-other-card" style="align-items:center">
+            <div class="addon-body">
+              <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Other / I Need Help Confirming</div>
+              <p class="addon-desc">A BRS specialist will confirm the right trailer connection for your tow vehicle.</p>
+            </div>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#8B9478;flex-shrink:0">No additional cost</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAV -->
+      <div id="config-nav" style="display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:6px">
+        <button id="btn-back" class="btn-back">Back</button>
+        <button id="btn-next" class="btn-next">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REVIEW ============ -->
+<section id="screen-review" class="brs-step" style="display:none;position:relative;z-index:5;max-width:1080px;margin:0 auto;padding:44px 32px 96px">
+  <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 07 · Confirm</div>
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.03em;line-height:.95;margin:0 0 28px">Review Your Build</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+    <div style="flex:1 1 380px;min-width:300px;display:flex;flex-direction:column;gap:14px">
+      <div id="review-ext-img" style="border-radius:14px;overflow:hidden;border:1px solid #34362F;aspect-ratio:16/10;background:#131409 center/cover no-repeat"></div>
+      <div id="review-int-img" style="border-radius:14px;overflow:hidden;border:1px solid #34362F;aspect-ratio:16/10;background:#131409 center/cover no-repeat"></div>
+      <div style="background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:8px 20px">
+        <div id="review-summary-rows"></div>
+      </div>
+    </div>
+    <div style="flex:1 1 320px;min-width:280px;display:flex;flex-direction:column;gap:16px">
+      <div style="background:#16170F;border:1px solid #34362F;border-radius:12px;overflow:hidden">
+        <div style="padding:18px 20px;border-bottom:1px solid #34362F"><span style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:#F3EEE2">Pricing</span></div>
+        <div style="padding:8px 20px">
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #2a2c24">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#C8B99A">Starting MSRP</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#F3EEE2">$69,990</span>
+          </div>
+          <div id="review-addons-list"></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid #2a2c24;border-bottom:1px solid #2a2c24">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#C8B99A">Selected Add-Ons Total</span>
+            <span id="review-addons-total" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#A9895D">$0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 14px">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:15px;color:#F3EEE2">Estimated Build Price</span>
+            <span id="review-estimated" style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:#A9895D">$69,990</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:11px;align-items:flex-start;background:rgba(214,181,109,0.07);border:1px solid rgba(214,181,109,0.35);border-radius:10px;padding:14px 16px">
+        <span style="color:#D6B56D;font-size:16px;line-height:1.2">ⓘ</span>
+        <p style="margin:0;font-size:12px;color:#C8B99A;line-height:1.55">Estimated build price is based on starting MSRP and selected add-ons. Final pricing, availability, taxes, freight, dealer fees, installation, regional pricing, and configuration details may vary. A BRS Offroad representative or authorized dealer will confirm the final build price.</p>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button id="btn-review-back" class="btn-back" style="padding:14px 22px">Back</button>
+        <button id="btn-save-build" class="btn-next" style="flex:1;padding:14px 22px">Save My Build</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAVE ============ -->
+<section id="screen-save" class="brs-step" style="display:none;position:relative;z-index:5;max-width:920px;margin:0 auto;padding:44px 32px 110px">
+  <!-- Form -->
+  <div id="save-form">
+    <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 08 · Next Step</div>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.03em;line-height:.95;margin:0 0 10px">Save Your Sherpa Gen 3 Build</h2>
+    <p style="font-size:16px;color:#C8B99A;max-width:620px;margin:0 0 30px">Save your build and a member of the BRS Offroad team or your closest dealer will help you take the next step.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+      <div style="flex:1 1 380px;min-width:300px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:6px">
+            <label class="field-label">First Name</label>
+            <input id="form-first" class="field-input" type="text" autocomplete="given-name">
+          </div>
+          <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:6px">
+            <label class="field-label">Last Name</label>
+            <input id="form-last" class="field-input" type="text" autocomplete="family-name">
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label class="field-label">Email</label>
+          <input id="form-email" class="field-input" type="email" autocomplete="email">
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:6px">
+            <label class="field-label">Phone Number</label>
+            <input id="form-phone" class="field-input" type="tel" autocomplete="tel">
+          </div>
+          <div style="flex:1 1 120px;display:flex;flex-direction:column;gap:6px">
+            <label class="field-label">ZIP Code</label>
+            <input id="form-zip" class="field-input" type="text" inputmode="numeric" autocomplete="postal-code">
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label class="field-label">Preferred Contact Method</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <div id="contact-call" class="pill pill-active" style="cursor:pointer">Call Me</div>
+            <div id="contact-text" class="pill pill-inactive" style="cursor:pointer">Text Me</div>
+            <div id="contact-email" class="pill pill-inactive" style="cursor:pointer">Email Me</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label class="field-label">Notes / Questions</label>
+          <textarea id="form-notes" class="field-input" rows="3" style="resize:vertical"></textarea>
+        </div>
+      </div>
+      <div style="flex:1 1 300px;min-width:280px;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#16170F;border:1px solid #34362F;border-radius:12px;padding:18px 20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;color:#F3EEE2;margin-bottom:12px">Your Build</div>
+          <div id="save-summary-rows"></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 4px">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:#F3EEE2">Est. Build Price</span>
+            <span id="save-estimated" style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#A9895D">$69,990</span>
+          </div>
+        </div>
+        <button id="btn-submit-email" class="btn-primary">Save &amp; Email My Build Sheet</button>
+        <button id="btn-submit-specialist" class="btn-secondary">Talk With a Sherpa Specialist</button>
+        <button id="btn-submit-dealer" class="btn-outline">Call My Closest Dealer</button>
+        <button id="btn-save-back" style="background:transparent;color:#8B9478;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;padding:4px;border-radius:6px;cursor:pointer">← Back to review</button>
+      </div>
+    </div>
+  </div>
+  <!-- Confirmation -->
+  <div id="save-confirm" style="display:none;text-align:center;padding:40px 0;max-width:560px;margin:0 auto">
+    <div style="width:72px;height:72px;border-radius:50%;background:#5F6B4F;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:34px;color:#F3EEE2">✓</div>
+    <h2 id="confirm-title" style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:.03em;line-height:.95;margin:0 0 14px">Build Saved</h2>
+    <p id="confirm-body" style="font-size:16px;color:#C8B99A;line-height:1.6;margin:0 0 8px"></p>
+    <p style="font-size:14px;color:#8B9478;line-height:1.6;margin:0 0 30px">Your build sheet will be emailed to you after submission.</p>
+    <div style="display:inline-flex;align-items:baseline;gap:14px;background:#16170F;border:1px solid #34362F;border-radius:10px;padding:16px 26px;margin-bottom:30px">
+      <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#C8B99A">Estimated Build Price</span>
+      <span id="confirm-price" style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:#A9895D">$69,990</span>
+    </div>
+    <div><button id="btn-restart" class="btn-outline" style="width:auto;padding:13px 28px">Start a New Build</button></div>
+  </div>
+</section>
+
+<div class="brs-footpad"></div>
+
+<!-- Mobile price bar -->
+<div id="mobile-bar" style="display:none">
+  <div style="line-height:1.05">
+    <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:10px;color:#C8B99A">Estimated Build Price</div>
+    <div id="mobile-price" style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#A9895D">$69,990</div>
+  </div>
+  <button id="btn-toggle-detail" style="background:#34362F;color:#F3EEE2;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;padding:10px 16px;border-radius:6px;cursor:pointer">View Build Price</button>
+</div>
+
+<div id="mobile-detail-overlay" style="display:none;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,0.5);align-items:flex-end">
+  <div id="mobile-detail-panel">
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #34362F">
+      <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:#C8B99A">Starting MSRP</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;color:#F3EEE2">$69,990</span>
+    </div>
+    <div id="mobile-detail-addons"></div>
+    <div style="display:flex;justify-content:space-between;padding:12px 0 4px;border-top:1px solid #34362F">
+      <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#F3EEE2">Estimated Build Price</span>
+      <span id="mobile-detail-price" style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#A9895D">$69,990</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const PRICES = {
+  base: 69990,
+  inverter: 950,
+  secondBattery: 2390,
+  heatedPerBattery: 375,
+  airConditioner: 2735,
+  inductionCooktop: 95, // update this value if BRS revises induction pricing
+};
+
+const EXTERIOR = [
+  { id: 'bronze', label: 'Bronze', hex: '#7A5638', swatch: 'linear-gradient(135deg, #7A5638 0%, #7A5638cc 60%, #7A563888 100%)' },
+  { id: 'silver', label: 'Silver', hex: '#B9BCBC', swatch: '#cccccc' },
+  { id: 'tan',    label: 'Tan',    hex: '#C8B99A', swatch: 'linear-gradient(135deg, #C8B99A 0%, #C8B99Acc 60%, #C8B99A88 100%)' },
+  { id: 'green',  label: 'Green',  hex: '#5F6B4F', swatch: 'linear-gradient(135deg, #5F6B4F 0%, #5F6B4Fcc 60%, #5F6B4F88 100%)' },
+];
+
+const EXTERIOR_IMAGES = {
+  tan:    'assets/sherpa-tan.png',
+  silver: 'assets/sherpa-silver.png',
+  bronze: 'assets/sherpa-bronze.png',
+  green:  'assets/sherpa-green.png',
+};
+
+const INTERIOR_IMAGES = {
+  'dark-brown': 'assets/interior-dark-brown.jpg',
+  'tan':        'assets/interior-tan.jpg',
+};
+
+const KITCHEN_IMAGE  = 'assets/kitchen-galley.png';
+const COMFORT_IMAGE  = 'assets/comfort-cabin.png';
+const TOW_IMAGE      = 'assets/tow-hitch.png';
+
+const LEATHER = [
+  { id: 'dark-brown', label: 'Dark Brown', hex: '#3B2A1D', texture: 'assets/leather-dark-brown.png' },
+  { id: 'tan',        label: 'Tan',        hex: '#B9986A', texture: 'assets/leather-tan.png' },
+];
+
+const STEPS = ['intro', 'exterior', 'interior', 'comfort', 'kitchen', 'power', 'tow', 'review', 'save'];
+const PROGRESS_STEPS = [
+  ['exterior', 'Exterior'],
+  ['interior', 'Interior'],
+  ['comfort',  'Comfort'],
+  ['kitchen',  'Kitchen'],
+  ['power',    'Power'],
+  ['tow',      'Tow'],
+  ['review',   'Review'],
+  ['save',     'Save'],
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  step: 'intro',
+  ext: 'tan',
+  leather: 'dark-brown',
+  inverter: false,
+  secondBattery: false,
+  heated: 0,
+  ac: false,
+  kitchen: 'propane',
+  trailer: 'standard',
+  showDetail: false,
+  submitted: null,
+  contact: 'call',
+};
+
+function setState(patch) {
+  Object.assign(state, typeof patch === 'function' ? patch(state) : patch);
+  render();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function money(n) {
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+function moneyCents(n) {
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function getAddOns() {
+  const h = Math.min(state.heated, state.secondBattery ? 2 : 1);
+  const items = [];
+  if (state.inverter)      items.push({ label: 'KISAE 3000W Pure Sine Inverter', price: PRICES.inverter });
+  if (state.secondBattery) items.push({ label: 'Second 270Ah GC3 LiFePO4 Battery', price: PRICES.secondBattery });
+  if (h > 0)               items.push({ label: 'Heated Battery Upgrade (' + h + ')', price: PRICES.heatedPerBattery * h });
+  if (state.ac)            items.push({ label: 'Dometic Air Conditioner', price: PRICES.airConditioner });
+  if (state.kitchen === 'induction') items.push({ label: 'SUMMIT Induction Cooktop', price: PRICES.inductionCooktop });
+  return items;
+}
+
+function getEstimated() {
+  return PRICES.base + getAddOns().reduce((s, a) => s + a.price, 0);
+}
+
+function getAddOnsTotal() {
+  return getAddOns().reduce((s, a) => s + a.price, 0);
+}
+
+function getExt() { return EXTERIOR.find(o => o.id === state.ext) || EXTERIOR[0]; }
+function getLea() { return LEATHER.find(o => o.id === state.leather) || LEATHER[0]; }
+
+function getPreviewSrc() {
+  if (state.step === 'interior') return INTERIOR_IMAGES[state.leather];
+  if (state.step === 'kitchen')  return KITCHEN_IMAGE;
+  if (state.step === 'comfort')  return COMFORT_IMAGE;
+  if (state.step === 'tow')      return TOW_IMAGE;
+  return EXTERIOR_IMAGES[state.ext];
+}
+
+function goTo(step) {
+  setState({ step, showDetail: false });
+  window.scrollTo(0, 0);
+}
+
+function el(id) { return document.getElementById(id); }
+function show(id) { const e = el(id); if (e) e.style.display = ''; }
+function hide(id) { const e = el(id); if (e) e.style.display = 'none'; }
+function showFlex(id) { const e = el(id); if (e) e.style.display = 'flex'; }
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const s = state;
+  const ext = getExt();
+  const lea = getLea();
+  const addOns = getAddOns();
+  const addOnsTotal = getAddOnsTotal();
+  const estimated = getEstimated();
+  const estimatedFmt = money(estimated);
+  const addOnsTotalFmt = addOnsTotal > 0 ? '+' + money(addOnsTotal) : '$0';
+  const h = Math.min(s.heated, s.secondBattery ? 2 : 1);
+
+  const building = s.step !== 'intro';
+  const isConfig = ['exterior', 'interior', 'comfort', 'kitchen', 'power', 'tow'].includes(s.step);
+  const showRec = s.ac || s.kitchen === 'induction';
+
+  // Screens
+  el('screen-intro').style.display   = s.step === 'intro'   ? '' : 'none';
+  el('screen-config').style.display  = isConfig              ? '' : 'none';
+  el('screen-review').style.display  = s.step === 'review'  ? '' : 'none';
+  el('screen-save').style.display    = s.step === 'save'    ? '' : 'none';
+
+  // Header price
+  el('header-price-wrap').style.display = building ? '' : 'none';
+  el('header-price-val').textContent = estimatedFmt;
+
+  // Progress bar
+  el('progress-bar').style.display = building ? 'flex' : 'none';
+  renderProgress(s.step);
+
+  // Mobile bar
+  el('mobile-bar').style.display = building ? 'flex' : 'none';
+  el('mobile-price').textContent = estimatedFmt;
+  el('btn-toggle-detail').textContent = s.showDetail ? 'Hide' : 'View Build Price';
+
+  // Mobile detail
+  const overlay = el('mobile-detail-overlay');
+  overlay.style.display = s.showDetail ? 'flex' : 'none';
+  if (s.showDetail) {
+    renderAddOnsList('mobile-detail-addons', addOns);
+    el('mobile-detail-price').textContent = estimatedFmt;
+  }
+
+  if (!isConfig) return;
+
+  // --- RAIL ---
+  // Preview
+  const previewSrc = getPreviewSrc();
+  const previewImg = el('preview-img');
+  const previewPh  = el('preview-placeholder');
+  if (previewSrc) {
+    previewImg.style.backgroundImage = 'url("' + previewSrc + '")';
+    previewImg.style.display = '';
+    previewPh.style.display = 'none';
+  } else {
+    previewImg.style.display = 'none';
+    previewPh.style.display = '';
+    el('preview-placeholder-text').textContent = '/assets/sherpa/exterior/' + ext.id + '.png';
+  }
+
+  // Wash
+  el('preview-wash').style.background = 'radial-gradient(58% 46% at 50% 60%, ' + ext.hex + '66, transparent 72%)';
+
+  // Glance
+  el('glance-ext-swatch').style.cssText = 'width:30px;height:30px;border-radius:7px;border:1px solid #4a4c43;background:' + ext.hex;
+  el('glance-ext-label').textContent = ext.label;
+  const leaSwatchBg = lea.texture
+    ? lea.hex + ' url("' + lea.texture + '") center/cover no-repeat'
+    : lea.hex;
+  el('glance-int-swatch').style.cssText = 'width:30px;height:30px;border-radius:7px;border:1px solid #4a4c43;background:' + leaSwatchBg;
+  el('glance-int-label').textContent = lea.label;
+
+  // Pricing rail
+  el('rail-addons-total').textContent = addOnsTotalFmt;
+  el('rail-estimated').textContent = estimatedFmt;
+  const addOnsList = el('rail-addons-list');
+  if (addOns.length > 0) {
+    addOnsList.style.cssText = 'display:flex;flex-direction:column;gap:9px;padding:12px 18px;border-bottom:1px solid #34362F';
+    renderAddOnsList('rail-addons-list', addOns);
+  } else {
+    addOnsList.style.display = 'none';
+  }
+
+  // Step panels
+  el('step-exterior').style.display  = s.step === 'exterior' ? '' : 'none';
+  el('step-interior').style.display  = s.step === 'interior' ? '' : 'none';
+  el('step-comfort').style.display   = s.step === 'comfort'  ? '' : 'none';
+  el('step-kitchen').style.display   = s.step === 'kitchen'  ? '' : 'none';
+  el('step-power').style.display     = s.step === 'power'    ? '' : 'none';
+  el('step-tow').style.display       = s.step === 'tow'      ? '' : 'none';
+
+  // Exterior grid
+  if (s.step === 'exterior') renderExteriorGrid();
+
+  // Leather grid
+  if (s.step === 'interior') renderLeatherGrid();
+
+  // Comfort
+  if (s.step === 'comfort') {
+    setCardSelected('ac-card', s.ac);
+    el('ac-chip').textContent = s.ac ? 'Added' : 'Add';
+    el('ac-chip').className = s.ac ? 'chip-added' : 'chip-add';
+    el('ac-rec-note').style.display = s.ac ? '' : 'none';
+  }
+
+  // Kitchen
+  if (s.step === 'kitchen') {
+    setCardSelected('propane-card', s.kitchen === 'propane');
+    setCardSelected('induction-card', s.kitchen === 'induction');
+    el('propane-chip').textContent  = s.kitchen === 'propane'    ? 'Selected' : 'Select';
+    el('propane-chip').className    = s.kitchen === 'propane'    ? 'chip-sel' : 'chip-unsel';
+    el('induction-chip').textContent = s.kitchen === 'induction' ? 'Selected' : 'Select';
+    el('induction-chip').className   = s.kitchen === 'induction' ? 'chip-sel' : 'chip-unsel';
+    el('induction-rec-note').style.display = s.kitchen === 'induction' ? '' : 'none';
+  }
+
+  // Power
+  if (s.step === 'power') {
+    setCardSelected('inverter-card', s.inverter);
+    el('inverter-chip').textContent = s.inverter ? 'Added' : 'Add';
+    el('inverter-chip').className   = s.inverter ? 'chip-added' : 'chip-add';
+
+    setCardSelected('battery2-card', s.secondBattery);
+    el('battery2-chip').textContent = s.secondBattery ? 'Added' : 'Add';
+    el('battery2-chip').className   = s.secondBattery ? 'chip-added' : 'chip-add';
+
+    // Heated pills
+    setPill('heated-0', h === 0, false);
+    setPill('heated-1', h === 1, false);
+    setPill('heated-2', h === 2, !s.secondBattery);
+    el('heated-lock-msg').style.display = !s.secondBattery ? '' : 'none';
+
+    // Power rec notes (inline under cards)
+    const recText = buildRecText(s);
+    el('inverter-rec').style.display   = showRec ? '' : 'none';
+    el('battery2-rec').style.display   = showRec ? '' : 'none';
+    el('inverter-rec-text').textContent  = recText;
+    el('battery2-rec-text').textContent  = recText;
+    el('power-rec-note').style.display   = showRec ? '' : 'none';
+  }
+
+  // Tow
+  if (s.step === 'tow') {
+    setCardSelected('trailer-std-card',   s.trailer === 'standard');
+    setCardSelected('trailer-other-card', s.trailer === 'other');
+  }
+
+  // Nav
+  const idx = STEPS.indexOf(s.step);
+  el('btn-next').textContent = s.step === 'tow' ? 'Review Build' : 'Continue';
+
+  // Review
+  if (s.step === 'review') {
+    // handled by renderReview() after state set, but call inline too
+  }
+}
+
+function renderReview() {
+  const s = state;
+  const ext = getExt();
+  const lea = getLea();
+  const addOns = getAddOns();
+  const addOnsTotal = getAddOnsTotal();
+  const h = Math.min(s.heated, s.secondBattery ? 2 : 1);
+
+  // Images
+  const extImgUrl = EXTERIOR_IMAGES[ext.id] ? 'url("' + EXTERIOR_IMAGES[ext.id] + '")' : 'none';
+  const intImgUrl = INTERIOR_IMAGES[s.leather] ? 'url("' + INTERIOR_IMAGES[s.leather] + '")' : 'none';
+  el('review-ext-img').style.backgroundImage = extImgUrl;
+  el('review-int-img').style.backgroundImage = intImgUrl;
+
+  // Summary rows
+  const powerParts = [];
+  if (s.inverter)      powerParts.push('3000W Inverter');
+  if (s.secondBattery) powerParts.push('Second 270Ah Battery');
+  if (h > 0)           powerParts.push('Heated Upgrade (' + h + ')');
+  const powerText = powerParts.length ? powerParts.join(' + ') : 'Standard power system';
+
+  const rows = [
+    { label: 'Exterior',   value: ext.label },
+    { label: 'Interior',   value: lea.label + ' Leather' },
+    { label: 'Power',      value: powerText },
+    { label: 'Climate',    value: s.ac ? 'Dometic Air Conditioner' : 'No climate add-on' },
+    { label: 'Kitchen',    value: s.kitchen === 'induction' ? 'SUMMIT Induction Cooktop' : 'Standard 2-Burner Propane' },
+    { label: 'Tow Setup',  value: s.trailer === 'standard' ? 'Standard 7-Way Round RV' : 'Other / Needs confirmation' },
+  ];
+
+  el('review-summary-rows').innerHTML = rows.map(r =>
+    '<div style="display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #2a2c24">' +
+    '<span style="font-family:\'Barlow Condensed\',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:#8B9478">' + r.label + '</span>' +
+    '<span style="font-size:14px;color:#F3EEE2;text-align:right;font-weight:500">' + r.value + '</span>' +
+    '</div>'
+  ).join('');
+
+  // Pricing
+  renderAddOnsList('review-addons-list', addOns, true);
+  el('review-addons-total').textContent = addOnsTotal > 0 ? '+' + money(addOnsTotal) : '$0';
+  el('review-estimated').textContent = money(PRICES.base + addOnsTotal);
+}
+
+function renderSave() {
+  const s = state;
+  const ext = getExt();
+  const lea = getLea();
+  const h = Math.min(s.heated, s.secondBattery ? 2 : 1);
+  const addOnsTotal = getAddOnsTotal();
+
+  const powerParts = [];
+  if (s.inverter)      powerParts.push('3000W Inverter');
+  if (s.secondBattery) powerParts.push('Second 270Ah Battery');
+  if (h > 0)           powerParts.push('Heated Upgrade (' + h + ')');
+  const powerText = powerParts.length ? powerParts.join(' + ') : 'Standard';
+
+  const rows = [
+    { label: 'Exterior', value: ext.label },
+    { label: 'Interior', value: lea.label },
+    { label: 'Power',    value: powerText },
+    { label: 'Kitchen',  value: s.kitchen === 'induction' ? 'Induction' : 'Propane' },
+  ];
+
+  el('save-summary-rows').innerHTML = rows.map(r =>
+    '<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #2a2c24">' +
+    '<span style="font-family:\'Barlow Condensed\',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#8B9478">' + r.label + '</span>' +
+    '<span style="font-size:13px;color:#F3EEE2;text-align:right">' + r.value + '</span>' +
+    '</div>'
+  ).join('');
+
+  el('save-estimated').textContent = money(PRICES.base + addOnsTotal);
+}
+
+function renderAddOnsList(containerId, addOns, review) {
+  const container = el(containerId);
+  if (!container) return;
+  container.innerHTML = addOns.map(a => {
+    const priceFmt = '+' + moneyCents(a.price);
+    return '<div style="display:flex;justify-content:space-between;gap:12px;padding:' + (review ? '10px 0' : '8px 0') + '">' +
+      '<span style="font-size:13px;color:#C8B99A;line-height:1.3">' + a.label + '</span>' +
+      '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;color:#F3EEE2;white-space:nowrap">' + priceFmt + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function renderProgress(currentStep) {
+  const bar = el('progress-bar');
+  const idx = STEPS.indexOf(currentStep);
+  bar.innerHTML = PROGRESS_STEPS.map(([id, label], i) => {
+    const active = id === currentStep;
+    const done   = STEPS.indexOf(id) < idx;
+    const bg  = active ? '#A9895D' : 'transparent';
+    const fg  = active ? '#0E0F0C' : done ? '#C8B99A' : '#6f7166';
+    const bc  = active ? '#A9895D' : done ? '#5F6B4F' : '#34362F';
+    const lc  = active ? '#F3EEE2' : done ? '#C8B99A' : '#6f7166';
+    const sep = i < PROGRESS_STEPS.length - 1 ? '<div class="prog-sep"></div>' : '';
+    return '<div class="prog-item" data-goto="' + id + '">' +
+      '<div class="prog-dot" style="background:' + bg + ';color:' + fg + ';border:1px solid ' + bc + '">' + String(i+1).padStart(2,'0') + '</div>' +
+      '<span class="prog-label" style="color:' + lc + '">' + label + '</span>' +
+      sep + '</div>';
+  }).join('');
+
+  bar.querySelectorAll('.prog-item').forEach(item => {
+    item.addEventListener('click', () => goTo(item.dataset.goto));
+  });
+}
+
+function renderExteriorGrid() {
+  const grid = el('exterior-grid');
+  grid.innerHTML = EXTERIOR.map(o => {
+    const sel = o.id === state.ext;
+    const swatchBg = o.id === 'silver' ? '#cccccc' : 'linear-gradient(135deg,' + o.hex + ' 0%,' + o.hex + 'cc 60%,' + o.hex + '88 100%)';
+    return '<div class="opt-card' + (sel ? ' selected' : '') + '" data-ext="' + o.id + '">' +
+      (sel ? '<div class="opt-check">✓</div>' : '') +
+      '<div class="opt-swatch" style="background:' + swatchBg + '"></div>' +
+      '<div class="opt-name">' + o.label + '</div>' +
+      '<div class="opt-price-incl">Included</div>' +
+      '</div>';
+  }).join('');
+  grid.querySelectorAll('.opt-card').forEach(card => {
+    card.addEventListener('click', () => setState({ ext: card.dataset.ext }));
+  });
+}
+
+function renderLeatherGrid() {
+  const grid = el('leather-grid');
+  grid.innerHTML = LEATHER.map(o => {
+    const sel = o.id === state.leather;
+    const swatchBg = o.texture
+      ? o.hex + ' url("' + o.texture + '") center/cover no-repeat'
+      : o.hex;
+    return '<div class="opt-card' + (sel ? ' selected' : '') + '" data-lea="' + o.id + '">' +
+      (sel ? '<div class="opt-check">✓</div>' : '') +
+      '<div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;border:1px solid #4a4c43;margin-bottom:12px;background:' + swatchBg + '"></div>' +
+      '<div class="opt-name">' + o.label + ' Leather</div>' +
+      '<div class="opt-price-incl">Included</div>' +
+      '</div>';
+  }).join('');
+  grid.querySelectorAll('.opt-card').forEach(card => {
+    card.addEventListener('click', () => setState({ leather: card.dataset.lea }));
+  });
+}
+
+function setCardSelected(id, selected) {
+  const card = el(id);
+  if (!card) return;
+  if (selected) card.classList.add('selected');
+  else card.classList.remove('selected');
+}
+
+function setPill(id, active, disabled) {
+  const p = el(id);
+  if (!p) return;
+  p.className = 'pill ' + (disabled ? 'pill-disabled' : active ? 'pill-active' : 'pill-inactive');
+  p.style.cursor = disabled ? 'not-allowed' : 'pointer';
+}
+
+function buildRecText(s) {
+  const picks = [];
+  if (s.ac) picks.push('Dometic Air Conditioner');
+  if (s.kitchen === 'induction') picks.push('induction cooktop');
+  return picks.length ? 'Recommended if you selected the ' + picks.join(' and ') : '';
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+el('btn-start').addEventListener('click', () => goTo('exterior'));
+
+// Nav
+el('btn-back').addEventListener('click', () => {
+  const idx = STEPS.indexOf(state.step);
+  if (idx > 0) goTo(STEPS[idx - 1]);
+});
+el('btn-next').addEventListener('click', () => {
+  const idx = STEPS.indexOf(state.step);
+  if (idx < STEPS.length - 1) {
+    const next = STEPS[idx + 1];
+    goTo(next);
+    if (next === 'review') renderReview();
+    if (next === 'save')   renderSave();
+  }
+});
+
+// Review
+el('btn-review-back').addEventListener('click', () => goTo('tow'));
+el('btn-save-build').addEventListener('click', () => {
+  goTo('save');
+  renderSave();
+});
+
+// Save back
+el('btn-save-back').addEventListener('click', () => {
+  goTo('review');
+  renderReview();
+});
+
+// Submit buttons
+function submitBuild(kind) {
+  const msgs = {
+    email:      { title: 'Build Saved',       body: 'Thanks! Your Sherpa Gen 3 build sheet is on its way to your inbox and our team has your details.' },
+    specialist: { title: "We'll Be In Touch",  body: 'A BRS Offroad Sherpa specialist will reach out shortly to walk through your build.' },
+    dealer:     { title: 'Dealer Notified',    body: 'Your closest BRS Offroad dealer will contact you using your preferred contact method.' },
+  };
+  const m = msgs[kind];
+  setState({ submitted: kind });
+  el('save-form').style.display    = 'none';
+  el('save-confirm').style.display = '';
+  el('confirm-title').textContent  = m.title;
+  el('confirm-body').textContent   = m.body;
+  el('confirm-price').textContent  = money(getEstimated());
+  window.scrollTo(0, 0);
+}
+el('btn-submit-email').addEventListener('click',      () => submitBuild('email'));
+el('btn-submit-specialist').addEventListener('click', () => submitBuild('specialist'));
+el('btn-submit-dealer').addEventListener('click',     () => submitBuild('dealer'));
+
+el('btn-restart').addEventListener('click', () => {
+  setState({ step: 'intro', submitted: null });
+  el('save-form').style.display    = '';
+  el('save-confirm').style.display = 'none';
+});
+
+// AC
+el('ac-card').addEventListener('click', () => setState({ ac: !state.ac }));
+
+// Kitchen
+el('propane-card').addEventListener('click',   () => setState({ kitchen: 'propane' }));
+el('induction-card').addEventListener('click', () => setState({ kitchen: 'induction' }));
+
+// Inverter
+el('inverter-card').addEventListener('click', () => setState({ inverter: !state.inverter }));
+
+// Second battery
+el('battery2-card').addEventListener('click', () => {
+  setState(s => ({
+    secondBattery: !s.secondBattery,
+    heated: !s.secondBattery ? s.heated : Math.min(s.heated, 1),
+  }));
+});
+
+// Heated pills
+el('heated-0').addEventListener('click', () => setState({ heated: 0 }));
+el('heated-1').addEventListener('click', () => setState({ heated: 1 }));
+el('heated-2').addEventListener('click', () => {
+  if (state.secondBattery) setState({ heated: 2 });
+});
+
+// Trailer
+el('trailer-std-card').addEventListener('click',   () => setState({ trailer: 'standard' }));
+el('trailer-other-card').addEventListener('click', () => setState({ trailer: 'other' }));
+
+// Mobile detail
+el('btn-toggle-detail').addEventListener('click', () => setState({ showDetail: !state.showDetail }));
+el('mobile-detail-overlay').addEventListener('click', (e) => {
+  if (e.target === el('mobile-detail-overlay')) setState({ showDetail: false });
+});
+
+// Contact method
+el('contact-call').addEventListener('click', () => {
+  setState({ contact: 'call' });
+  updateContactPills();
+});
+el('contact-text').addEventListener('click', () => {
+  setState({ contact: 'text' });
+  updateContactPills();
+});
+el('contact-email').addEventListener('click', () => {
+  setState({ contact: 'email' });
+  updateContactPills();
+});
+
+function updateContactPills() {
+  ['call', 'text', 'email'].forEach(v => {
+    const el2 = el('contact-' + v);
+    el2.className = 'pill ' + (state.contact === v ? 'pill-active' : 'pill-inactive');
+  });
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+render();
+</script>
+</body>
+</html>
