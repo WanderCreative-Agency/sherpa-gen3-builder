@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Barlow+Condensed:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0E0F0C; }
+  ::selection { background: #A9895D; color: #0E0F0C; }
+  ::placeholder { color: #6f7166; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0E0F0C; }
+  ::-webkit-scrollbar-thumb { background: #34362F; border-radius: 6px; }
+  input, textarea, select { font-family: 'Inter', sans-serif; }
+  @keyframes brsFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .brs-step { animation: brsFade .35s ease both; }
+  .brs-mobilebar { display: none; }
+  .brs-headprice { }
+  .brs-nav-mob { order: 3; }
+  @media (max-width: 940px) {
+    .brs-rail { position: static !important; }
+    .brs-rail.brs-col { order: 2 !important; }
+    .brs-col { order: 1 !important; }
+    .brs-mobilebar { display: flex !important; }
+    .brs-headprice { display: none !important; }
+    .brs-nav-desk { display: none !important; }
+    .brs-nav-mob { display: flex !important; }
+    .brs-footpad { height: 76px; }
+  }
+  @media (max-width: 560px) {
+    .brs-rail, .brs-col { flex-basis: 100% !important; min-width: 0 !important; }
+    .brs-pad { padding-left: 18px !important; padding-right: 18px !important; }
+    .brs-grid2 { grid-template-columns: 1fr !important; }
+  }
+</style>
+</helmet>
+
+<div style="position:relative;min-height:100vh;background:#0E0F0C;color:#F3EEE2;font-family:'Inter',sans-serif;overflow-x:hidden">
+
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:url('assets/topo-cream.png');background-size:1200px auto;background-position:center;background-repeat:repeat;opacity:0.09"></div>
+
+  <header style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 32px;background:rgba(14,15,12,0.86);backdrop-filter:blur(10px);border-bottom:1px solid #1F211C">
+    <div style="display:flex;align-items:center;gap:18px;flex-shrink:0">
+      <img src="assets/brs-wordmark-white.png" alt="BRS Offroad" style="height:22px;width:auto;display:block">
+      <div style="width:1px;height:26px;background:#34362F"></div>
+      <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.2em;font-size:12px;color:#A9895D">Sherpa Gen 3 Builder</span>
+    </div>
+    <sc-if value="{{ building }}" hint-placeholder-val="{{ false }}">
+      <div class="brs-headprice" style="display:flex;align-items:center;gap:18px;flex-shrink:0">
+        <div style="text-align:right;line-height:1">
+          <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:#C8B99A;margin-bottom:3px">Estimated Build Price</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:.02em;color:#F3EEE2">{{ estimatedFmt }}</div>
+        </div>
+      </div>
+    </sc-if>
+  </header>
+
+  <sc-if value="{{ building }}" hint-placeholder-val="{{ false }}">
+    <div style="position:relative;z-index:5;display:flex;align-items:center;gap:8px;overflow-x:auto;padding:14px 32px;border-bottom:1px solid #1F211C;background:#0E0F0C">
+      <sc-for list="{{ progress }}" as="node" hint-placeholder-count="8">
+        <div onClick="{{ node.onClick }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;flex-shrink:0;padding-right:4px">
+          <div style="{{ node.dotStyle }}">{{ node.n }}</div>
+          <span style="{{ node.labelStyle }}">{{ node.label }}</span>
+          <div style="width:26px;height:1px;background:#34362F;margin:0 2px"></div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ============ INTRO ============ -->
+  <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ true }}">
+    <section data-screen-label="Intro" class="brs-step brs-pad" style="position:relative;z-index:5;max-width:1200px;margin:0 auto;padding:64px 32px 80px">
+      <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:center">
+        <div class="brs-col" style="flex:1 1 420px;min-width:320px">
+          <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.22em;font-size:14px;color:#A9895D;margin-bottom:18px">ADVENTURE AWAITS</div>
+          <h1 style="font-family:'Bebas Neue',sans-serif;font-size:84px;line-height:.9;letter-spacing:.02em;margin:0 0 24px;color:#F3EEE2">Build Your<br>Sherpa Gen 3</h1>
+          <p style="font-size:17px;line-height:1.65;color:#C8B99A;max-width:540px;margin:0 0 32px">Design your Sherpa Gen 3 around the way you travel. Choose your exterior finish, interior leather, power setup, comfort upgrades, kitchen configuration, and additional features. As you build, you'll review your selected options, see your estimated build price, and save your build so the BRS Offroad team or your closest dealer can help you take the next step.</p>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:24px">
+            <button onClick="{{ start }}" style="background:#A9895D;color:#0E0F0C;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:19px;font-weight:600;padding:16px 40px;border-radius:6px;cursor:pointer;transition:background .15s" style-hover="background:#927449">Start Building</button>
+            <div style="line-height:1.1">
+              <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:#8B9478;margin-bottom:4px">Starting MSRP</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:#F3EEE2">$69,990</div>
+            </div>
+          </div>
+        </div>
+        <div class="brs-col" style="flex:1 1 420px;min-width:320px">
+          <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid #34362F;background:radial-gradient(120% 90% at 50% 18%, #2a2c26 0%, #131409 72%);aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+            <div style="position:absolute;inset:0;background:radial-gradient(58% 48% at 50% 62%, rgba(200,185,154,0.18), transparent 72%)"></div>
+            <div style="position:absolute;inset:0;background:url(&quot;./4-mqvc4jau.jpg&quot;) center/cover no-repeat"></div>
+            
+          </div>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- ============ CONFIG (exterior..tow) ============ -->
+  <sc-if value="{{ isConfig }}" hint-placeholder-val="{{ false }}">
+    <div class="brs-pad" style="position:relative;z-index:5;max-width:1320px;margin:0 auto;padding:36px 32px 96px;display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+
+      <!-- LEFT RAIL: preview + pricing -->
+      <div class="brs-rail brs-col" style="position:sticky;top:104px;flex:1 1 460px;min-width:340px;display:flex;flex-direction:column;gap:18px">
+        <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid #34362F;background:radial-gradient(120% 90% at 50% 16%, #2a2c26 0%, #131409 74%);aspect-ratio:16/11;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+          <div style="position:absolute;inset:0;transition:background .4s ease;background:{{ previewWash }}"></div>
+          <sc-if value="{{ hasPreviewImg }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;inset:0;z-index:2;background-position:center;background-size:cover;background-repeat:no-repeat;transition:background-image .25s ease;background-image:{{ previewImgUrl }}"></div>
+          </sc-if>
+          <sc-if value="{{ noPreviewImg }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative;z-index:2;width:86%;max-width:535px;aspect-ratio:535/282;border-radius:12px;border:1px dashed #4a4c43;background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 11px, transparent 11px 22px);display:flex;align-items:center;justify-content:center;text-align:center">
+              <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#9a9c8f;padding:0 14px">{{ previewAsset }}</span>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- at a glance -->
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;display:flex;align-items:center;gap:11px;background:#1F211C;border:1px solid #34362F;border-radius:10px;padding:12px 14px">
+            <div style="width:30px;height:30px;border-radius:7px;border:1px solid #4a4c43;{{ extSwatchStyle }}"></div>
+            <div style="line-height:1.15"><div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:10px;color:#8B9478">Exterior</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#F3EEE2">{{ extLabel }}</div></div>
+          </div>
+          <div style="flex:1;display:flex;align-items:center;gap:11px;background:#1F211C;border:1px solid #34362F;border-radius:10px;padding:12px 14px">
+            <div style="width:30px;height:30px;border-radius:7px;border:1px solid #4a4c43;{{ leatherSwatchStyle }}"></div>
+            <div style="line-height:1.15"><div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:10px;color:#8B9478">Interior</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#F3EEE2">{{ leatherLabel }}</div></div>
+          </div>
+        </div>
+
+        <!-- pricing card -->
+        <div style="background:#1F211C;border:1px solid #34362F;border-radius:12px;overflow:hidden">
+          <div style="padding:16px 18px;border-bottom:1px solid #34362F">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+              <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:#C8B99A">Starting MSRP</span>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#F3EEE2">$69,990</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:13px;color:#C8B99A">Selected Add-Ons</span>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#A9895D">{{ addOnsTotalSigned }}</span>
+            </div>
+          </div>
+          <sc-if value="{{ hasAddOns }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 18px;border-bottom:1px solid #34362F;display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ addOns }}" as="a" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:12px">
+                  <span style="font-size:13px;color:#C8B99A;line-height:1.3">{{ a.label }}</span>
+                  <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:#F3EEE2;white-space:nowrap">{{ a.priceFmt }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="padding:16px 18px;background:#16170F;display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:14px;color:#F3EEE2">Estimated Build Price</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#A9895D">{{ estimatedFmt }}</span>
+          </div>
+        </div>
+        <p style="font-size:11px;line-height:1.5;color:#6f7166;margin:0">Estimated build price is based on starting MSRP and selected add-ons. Final pricing, availability, taxes, freight, dealer fees, installation, regional pricing, and configuration details may vary. A BRS Offroad representative or authorized dealer will confirm the final build price.</p>
+      </div>
+
+      <!-- RIGHT: step content -->
+      <div class="brs-col" style="flex:1 1 420px;min-width:320px;display:flex;flex-direction:column;gap:22px">
+
+        <!-- EXTERIOR -->
+        <sc-if value="{{ isExterior }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Exterior" class="brs-step">
+            <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 01 · Finish</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Choose Your Exterior Finish</h2>
+            <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">All exterior color options are included at no additional cost.</p>
+            <div class="brs-grid2" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+              <sc-for list="{{ exteriorOpts }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.onSelect }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:16px;cursor:pointer">
+                  <sc-if value="{{ o.selected }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div>
+                    <div style="position:absolute;top:10px;right:10px;z-index:2;width:22px;height:22px;border-radius:50%;background:#5F6B4F;color:#F3EEE2;display:flex;align-items:center;justify-content:center;font-size:13px">✓</div>
+                  </sc-if>
+                  <div style="position:relative;width:100%;aspect-ratio:3/2;border-radius:8px;border:1px solid #4a4c43;margin-bottom:12px;{{ o.swatchStyle }}"></div>
+                  <div style="position:relative;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:18px;color:#F3EEE2">{{ o.label }}</div>
+                  <div style="position:relative;font-size:12px;color:#8B9478">Included</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- INTERIOR -->
+        <sc-if value="{{ isInterior }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Interior" class="brs-step">
+            <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 02 · Cabin</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Choose Your Interior Leather</h2>
+            <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">All leather color options are included at no additional cost.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+              <sc-for list="{{ leatherOpts }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.onSelect }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:16px;cursor:pointer">
+                  <sc-if value="{{ o.selected }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div>
+                    <div style="position:absolute;top:10px;right:10px;z-index:2;width:22px;height:22px;border-radius:50%;background:#5F6B4F;color:#F3EEE2;display:flex;align-items:center;justify-content:center;font-size:13px">✓</div>
+                  </sc-if>
+                  <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;border:1px solid #4a4c43;margin-bottom:12px;background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0 8px, transparent 8px 16px);{{ o.swatchStyle }}"></div>
+                  <div style="position:relative;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:18px;color:#F3EEE2">{{ o.label }} Leather</div>
+                  <div style="position:relative;font-size:12px;color:#8B9478">Included</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- POWER -->
+        <sc-if value="{{ isPower }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Power" class="brs-step">
+            <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 05 · Off-Grid Power</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Set Up Your Off-Grid Power</h2>
+            <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">Customize your Sherpa's power system for longer trips, larger electrical loads, and more flexibility off the grid.</p>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <!-- inverter -->
+              <div onClick="{{ toggleInverter }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start">
+                <sc-if value="{{ inverterSel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+                <div style="position:relative;width:78px;height:78px;flex-shrink:0;border-radius:8px;border:1px solid #4a4c43;background:#fff url('assets/kisae-inverter.webp') center/cover no-repeat"></div>
+                <div style="position:relative;flex:1">
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">KISAE 3000W Pure Sine Inverter</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#A9895D;white-space:nowrap">+$950.00</span></div>
+                  <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">Add more off-grid power flexibility with a 3000W pure sine inverter designed to support larger electrical loads and everyday camping essentials.</p>
+                  <sc-if value="{{ showPowerRec }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:7px;margin-top:9px"><span style="color:#D6B56D;font-size:11px;line-height:1">★</span><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#D6B56D">{{ powerRecText }}</span></div></sc-if>
+                </div>
+                <div style="position:relative;align-self:center;{{ inverterChip }}">{{ inverterChipText }}</div>
+              </div>
+
+              <!-- second battery -->
+              <div onClick="{{ toggleSecondBattery }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start">
+                <sc-if value="{{ secondBatterySel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+                <div style="position:relative;width:78px;height:78px;flex-shrink:0;border-radius:8px;border:1px solid #4a4c43;background:#fff url('assets/battleborn-battery.webp') center/cover no-repeat"></div>
+                <div style="position:relative;flex:1">
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Second 270Ah GC3 LiFePO4 Battery</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#A9895D;white-space:nowrap">+$2,390.00</span></div>
+                  <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">Increase your onboard power capacity for longer off-grid stays, extended appliance use, and more time away from hookups.</p>
+                  <sc-if value="{{ showPowerRec }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:7px;margin-top:9px"><span style="color:#D6B56D;font-size:11px;line-height:1">★</span><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#D6B56D">{{ powerRecText }}</span></div></sc-if>
+                </div>
+                <div style="position:relative;align-self:center;{{ secondBatteryChip }}">{{ secondBatteryChipText }}</div>
+              </div>
+
+              <!-- heated upgrade -->
+              <div style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;display:flex;gap:16px;align-items:flex-start">
+                <div style="position:relative;width:78px;height:78px;flex-shrink:0;border-radius:8px;border:1px solid #4a4c43;background:#fff url('assets/heated-battery.jpeg') center/cover no-repeat"></div>
+                <div style="position:relative;flex:1">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Heated Battery Upgrade</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#A9895D;white-space:nowrap">+$375.00 / battery</span></div>
+                <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 14px">Upgrade your 270Ah GC3 Smart LiFePO4 battery for improved cold-weather performance — ideal for colder climates or trips where battery temperature management matters.</p>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <div onClick="{{ onHeated0 }}" style="{{ heated0Style }}">No Upgrade</div>
+                  <div onClick="{{ onHeated1 }}" style="{{ heated1Style }}">Upgrade 1 Battery · +$375</div>
+                  <div onClick="{{ onHeated2 }}" style="{{ heated2Style }}">Upgrade 2 Batteries · +$750</div>
+                </div>
+                <sc-if value="{{ heated2Locked }}" hint-placeholder-val="{{ false }}"><p style="font-size:12px;color:#8B9478;margin:10px 0 0">Add the second 270Ah battery above to enable the two-battery heated upgrade.</p></sc-if>
+                </div>
+              </div>
+            </div>
+
+            <sc-if value="{{ recommend }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;display:flex;gap:12px;align-items:flex-start;background:rgba(214,181,109,0.08);border:1px solid rgba(214,181,109,0.4);border-radius:10px;padding:14px 16px">
+                <span style="color:#D6B56D;font-size:18px;line-height:1">⚠</span>
+                <p style="margin:0;font-size:13px;color:#D6B56D;line-height:1.5"><strong style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase">Recommended:</strong> For heavier electrical use, BRS recommends pairing this upgrade with additional battery or inverter capacity.</p>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- COMFORT -->
+        <sc-if value="{{ isComfort }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Comfort" class="brs-step">
+            <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 03 · Climate</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Comfort &amp; Climate</h2>
+            <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">Add comfort-focused upgrades to make your Sherpa more capable across different climates and travel conditions.</p>
+            <div onClick="{{ toggleAC }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start">
+              <sc-if value="{{ acSel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+              <div style="position:relative;width:96px;height:96px;flex-shrink:0;border-radius:8px;border:1px solid #4a4c43;background:#fff url('assets/dometic-ac.webp') center/contain no-repeat"></div>
+              <div style="position:relative;flex:1">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Dometic Air Conditioner</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#A9895D;white-space:nowrap">+$2,735.00</span></div>
+                <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">Stay comfortable in warmer climates with added air conditioning designed to help keep the cabin cool when temperatures rise.</p>
+              </div>
+              <div style="position:relative;align-self:center;{{ acChip }}">{{ acChipText }}</div>
+            </div>
+            <sc-if value="{{ acSel }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;display:flex;gap:12px;align-items:flex-start;background:rgba(214,181,109,0.08);border:1px solid rgba(214,181,109,0.4);border-radius:10px;padding:14px 16px">
+                <span style="color:#D6B56D;font-size:18px;line-height:1">⚠</span>
+                <p style="margin:0;font-size:13px;color:#D6B56D;line-height:1.5"><strong style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase">Recommended:</strong> For heavier electrical use, BRS recommends pairing this upgrade with additional battery or inverter capacity.</p>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- KITCHEN -->
+        <sc-if value="{{ isKitchen }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Kitchen" class="brs-step">
+            <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 04 · Galley</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Choose Your Kitchen Setup</h2>
+            <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">Choose the cooking setup that best fits the way you camp. Only one kitchen setup can be selected.</p>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div onClick="{{ setPropane }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start">
+                <sc-if value="{{ propaneSel }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+                <div style="position:relative;width:78px;height:78px;flex-shrink:0;border-radius:8px;border:1px solid #4a4c43;background:#0E0F0C url('assets/propane-cooktop.jpg') center/cover no-repeat"></div>
+                <div style="position:relative;flex:1">
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Standard 2-Burner Propane Cooktop</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#8B9478;white-space:nowrap">Included</span></div>
+                  <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">Included with the Sherpa Gen 3.</p>
+                </div>
+                <div style="position:relative;align-self:center;{{ propaneChip }}">{{ propaneChipText }}</div>
+              </div>
+              <div onClick="{{ setInduction }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:flex-start">
+                <sc-if value="{{ inductionSel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+                <div style="position:relative;width:78px;height:78px;flex-shrink:0;border-radius:8px;border:1px solid #4a4c43;background:#0E0F0C url('assets/induction-cooktop.webp') center/cover no-repeat"></div>
+                <div style="position:relative;flex:1">
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">SUMMIT 12" 2-Zone Induction Cooktop</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;color:#A9895D;white-space:nowrap">+$95.00</span></div>
+                  <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">Upgrade from the standard 2-burner propane cooktop to a clean electric induction cooking setup with two cooking zones. This replaces the standard propane cooktop.</p>
+                </div>
+                <div style="position:relative;align-self:center;{{ inductionChip }}">{{ inductionChipText }}</div>
+              </div>
+            </div>
+            <sc-if value="{{ inductionSel }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px;display:flex;gap:12px;align-items:flex-start;background:rgba(214,181,109,0.08);border:1px solid rgba(214,181,109,0.4);border-radius:10px;padding:14px 16px">
+                <span style="color:#D6B56D;font-size:18px;line-height:1">⚠</span>
+                <p style="margin:0;font-size:13px;color:#D6B56D;line-height:1.5"><strong style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase">Recommended:</strong> For heavier electrical use, BRS recommends pairing this upgrade with additional battery or inverter capacity.</p>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- TOW -->
+        <sc-if value="{{ isTow }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Tow" class="brs-step">
+            <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 06 · Tow Setup</div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:.03em;line-height:.95;margin:0 0 6px">Confirm Your Tow Setup</h2>
+            <p style="font-size:15px;color:#C8B99A;margin:0 0 22px">The Sherpa Gen 3 comes standard with a U.S. 7-Way Round RV Trailer Connection. If your tow vehicle requires a different trailer plug setup, BRS can outfit your camper with the appropriate connection.</p>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div onClick="{{ setTrailerStd }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:center">
+                <sc-if value="{{ trailerStdSel }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+                <div style="position:relative;flex:1">
+                  <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Standard U.S. 7-Way Round RV Connection</div>
+                  <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">The standard configuration for the Sherpa Gen 3.</p>
+                </div>
+                <span style="position:relative;font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#8B9478">No additional cost</span>
+              </div>
+              <div onClick="{{ setTrailerOther }}" style="position:relative;background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:18px;cursor:pointer;display:flex;gap:16px;align-items:center">
+                <sc-if value="{{ trailerOtherSel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;border:2px solid #A9895D;background:rgba(169,137,93,0.12);border-radius:12px;pointer-events:none"></div></sc-if>
+                <div style="position:relative;flex:1">
+                  <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:19px;color:#F3EEE2">Other / I Need Help Confirming</div>
+                  <p style="font-size:13.5px;color:#C8B99A;line-height:1.5;margin:6px 0 0">A BRS specialist will confirm the right trailer connection for your tow vehicle.</p>
+                </div>
+                <span style="position:relative;font-family:'Barlow Condensed',sans-serif;font-size:15px;color:#8B9478">No additional cost</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- NAV (desktop: in step column) -->
+        <div class="brs-nav-desk" style="display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:6px">
+          <button onClick="{{ back }}" style="background:transparent;color:#F3EEE2;border:1px solid #34362F;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;padding:13px 24px;border-radius:6px;cursor:pointer">Back</button>
+          <button onClick="{{ next }}" style="background:#A9895D;color:#0E0F0C;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;font-weight:600;padding:13px 34px;border-radius:6px;cursor:pointer;transition:background .15s" style-hover="background:#927449">{{ nextLabel }}</button>
+        </div>
+      </div>
+
+      <!-- NAV (mobile: full-width row below preview + pricing) -->
+      <div class="brs-nav-mob" style="display:none;width:100%;justify-content:space-between;align-items:center;gap:14px">
+        <button onClick="{{ back }}" style="background:transparent;color:#F3EEE2;border:1px solid #34362F;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;padding:13px 24px;border-radius:6px;cursor:pointer">Back</button>
+        <button onClick="{{ next }}" style="flex:1;background:#A9895D;color:#0E0F0C;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;font-weight:600;padding:13px 34px;border-radius:6px;cursor:pointer;transition:background .15s" style-hover="background:#927449">{{ nextLabel }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ REVIEW ============ -->
+  <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Review" class="brs-step brs-pad" style="position:relative;z-index:5;max-width:1080px;margin:0 auto;padding:44px 32px 96px">
+      <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 07 · Confirm</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.03em;line-height:.95;margin:0 0 28px">Review Your Build</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+        <div class="brs-col" style="flex:1 1 380px;min-width:300px;display:flex;flex-direction:column;gap:14px">
+          <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid #34362F;aspect-ratio:16/10;background:#131409 center/cover no-repeat;background-image:{{ reviewExtUrl }}"></div>
+          <div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid #34362F;aspect-ratio:16/10;background:#131409 center/cover no-repeat;background-image:{{ reviewIntUrl }}"></div>
+          <div style="background:#1F211C;border:1px solid #34362F;border-radius:12px;padding:8px 20px">
+            <sc-for list="{{ summaryRows }}" as="r" hint-placeholder-count="6">
+              <div style="display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #2a2c24">
+                <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:#8B9478">{{ r.label }}</span>
+                <span style="font-size:14px;color:#F3EEE2;text-align:right;font-weight:500">{{ r.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div class="brs-col" style="flex:1 1 320px;min-width:280px;display:flex;flex-direction:column;gap:16px">
+          <div style="background:#16170F;border:1px solid #34362F;border-radius:12px;overflow:hidden">
+            <div style="padding:18px 20px;border-bottom:1px solid #34362F"><span style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:#F3EEE2">Pricing</span></div>
+            <div style="padding:8px 20px">
+              <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #2a2c24"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#C8B99A">Starting MSRP</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#F3EEE2">$69,990</span></div>
+              <sc-for list="{{ addOns }}" as="a" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0"><span style="font-size:13px;color:#C8B99A;line-height:1.3">{{ a.label }}</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:#F3EEE2;white-space:nowrap">{{ a.priceFmt }}</span></div>
+              </sc-for>
+              <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid #2a2c24;border-bottom:1px solid #2a2c24"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#C8B99A">Selected Add-Ons Total</span><span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#A9895D">{{ addOnsTotalSigned }}</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 14px"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:15px;color:#F3EEE2">Estimated Build Price</span><span style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:#A9895D">{{ estimatedFmt }}</span></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:11px;align-items:flex-start;background:rgba(214,181,109,0.07);border:1px solid rgba(214,181,109,0.35);border-radius:10px;padding:14px 16px">
+            <span style="color:#D6B56D;font-size:16px;line-height:1.2">ⓘ</span>
+            <p style="margin:0;font-size:12px;color:#C8B99A;line-height:1.55">Estimated build price is based on starting MSRP and selected add-ons. Final pricing, availability, taxes, freight, dealer fees, installation, regional pricing, and configuration details may vary. A BRS Offroad representative or authorized dealer will confirm the final build price.</p>
+          </div>
+          <div style="display:flex;gap:12px">
+            <button onClick="{{ back }}" style="background:transparent;color:#F3EEE2;border:1px solid #34362F;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;padding:14px 22px;border-radius:6px;cursor:pointer">Back</button>
+            <button onClick="{{ next }}" style="flex:1;background:#A9895D;color:#0E0F0C;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;font-weight:600;padding:14px 22px;border-radius:6px;cursor:pointer;transition:background .15s" style-hover="background:#927449">Save My Build</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- ============ SAVE ============ -->
+  <sc-if value="{{ isSave }}" hint-placeholder-val="{{ false }}">
+    <section data-screen-label="Save" class="brs-step" style="position:relative;z-index:5;max-width:920px;margin:0 auto;padding:44px 32px 110px">
+      <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:#A9895D;margin-bottom:8px">Step 08 · Next Step</div>
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.03em;line-height:.95;margin:0 0 10px">Save Your Sherpa Gen 3 Build</h2>
+          <p style="font-size:16px;color:#C8B99A;max-width:620px;margin:0 0 30px">Save your build and a member of the BRS Offroad team or your closest dealer will help you take the next step.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+            <div class="brs-col" style="flex:1 1 380px;min-width:300px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;gap:14px;flex-wrap:wrap">
+                <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:6px"><label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">First Name</label><input value="{{ form.first }}" onChange="{{ onFirst }}" style="background:#1F211C;border:1px solid #34362F;border-radius:7px;padding:12px 13px;color:#F3EEE2;font-size:15px;outline:none"></div>
+                <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:6px"><label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">Last Name</label><input value="{{ form.last }}" onChange="{{ onLast }}" style="background:#1F211C;border:1px solid #34362F;border-radius:7px;padding:12px 13px;color:#F3EEE2;font-size:15px;outline:none"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">Email</label><input value="{{ form.email }}" onChange="{{ onEmail }}" type="email" style="background:#1F211C;border:1px solid #34362F;border-radius:7px;padding:12px 13px;color:#F3EEE2;font-size:15px;outline:none"></div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap">
+                <div style="flex:1 1 150px;display:flex;flex-direction:column;gap:6px"><label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">Phone Number</label><input value="{{ form.phone }}" onChange="{{ onPhone }}" type="tel" style="background:#1F211C;border:1px solid #34362F;border-radius:7px;padding:12px 13px;color:#F3EEE2;font-size:15px;outline:none"></div>
+                <div style="flex:1 1 120px;display:flex;flex-direction:column;gap:6px"><label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">ZIP Code</label><input value="{{ form.zip }}" onChange="{{ onZip }}" style="background:#1F211C;border:1px solid #34362F;border-radius:7px;padding:12px 13px;color:#F3EEE2;font-size:15px;outline:none"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">Preferred Contact Method</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <div onClick="{{ onContactCall }}" style="{{ contactCallStyle }}">Call Me</div>
+                  <div onClick="{{ onContactText }}" style="{{ contactTextStyle }}">Text Me</div>
+                  <div onClick="{{ onContactEmail }}" style="{{ contactEmailStyle }}">Email Me</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px"><label style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:#8B9478">Notes / Questions</label><textarea onChange="{{ onNotes }}" rows="3" style="background:#1F211C;border:1px solid #34362F;border-radius:7px;padding:12px 13px;color:#F3EEE2;font-size:15px;outline:none;resize:vertical">{{ form.notes }}</textarea></div>
+            </div>
+
+            <div style="flex:1 1 300px;min-width:280px;display:flex;flex-direction:column;gap:14px">
+              <div style="background:#16170F;border:1px solid #34362F;border-radius:12px;padding:18px 20px">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;color:#F3EEE2;margin-bottom:12px">Your Build</div>
+                <sc-for list="{{ summaryRowsShort }}" as="r" hint-placeholder-count="4">
+                  <div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #2a2c24"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:#8B9478">{{ r.label }}</span><span style="font-size:13px;color:#F3EEE2;text-align:right">{{ r.value }}</span></div>
+                </sc-for>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 4px"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:#F3EEE2">Est. Build Price</span><span style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#A9895D">{{ estimatedFmt }}</span></div>
+              </div>
+              <button onClick="{{ submitEmail }}" style="background:#A9895D;color:#0E0F0C;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;font-weight:600;padding:15px 20px;border-radius:6px;cursor:pointer;transition:background .15s" style-hover="background:#927449">Save &amp; Email My Build Sheet</button>
+              <button onClick="{{ submitSpecialist }}" style="background:#5F6B4F;color:#F3EEE2;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;padding:15px 20px;border-radius:6px;cursor:pointer">Talk With a Sherpa Specialist</button>
+              <button onClick="{{ submitDealer }}" style="background:transparent;color:#F3EEE2;border:1px solid #C8B99A;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:16px;padding:15px 20px;border-radius:6px;cursor:pointer">Call My Closest Dealer</button>
+              <button onClick="{{ back }}" style="background:transparent;color:#8B9478;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;padding:4px;border-radius:6px;cursor:pointer">← Back to review</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;padding:40px 0;max-width:560px;margin:0 auto">
+          <div style="width:72px;height:72px;border-radius:50%;background:#5F6B4F;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:34px;color:#F3EEE2">✓</div>
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:.03em;line-height:.95;margin:0 0 14px">{{ confirmTitle }}</h2>
+          <p style="font-size:16px;color:#C8B99A;line-height:1.6;margin:0 0 8px">{{ confirmBody }}</p>
+          <p style="font-size:14px;color:#8B9478;line-height:1.6;margin:0 0 30px">Your build sheet will be emailed to you after submission.</p>
+          <div style="display:inline-flex;align-items:baseline;gap:14px;background:#16170F;border:1px solid #34362F;border-radius:10px;padding:16px 26px;margin-bottom:30px">
+            <span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#C8B99A">Estimated Build Price</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:#A9895D">{{ estimatedFmt }}</span>
+          </div>
+          <div><button onClick="{{ restart }}" style="background:transparent;color:#F3EEE2;border:1px solid #C8B99A;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:15px;padding:13px 28px;border-radius:6px;cursor:pointer">Start a New Build</button></div>
+        </div>
+      </sc-if>
+    </section>
+  </sc-if>
+
+  <div class="brs-footpad"></div>
+
+  <!-- MOBILE PRICE BAR -->
+  <sc-if value="{{ building }}" hint-placeholder-val="{{ false }}">
+    <div class="brs-mobilebar" style="position:fixed;left:0;right:0;bottom:0;z-index:70;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;background:rgba(14,15,12,0.95);backdrop-filter:blur(10px);border-top:1px solid #34362F">
+      <div style="line-height:1.05"><div style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:10px;color:#C8B99A">Estimated Build Price</div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#A9895D">{{ estimatedFmt }}</div></div>
+      <button onClick="{{ toggleDetail }}" style="background:#34362F;color:#F3EEE2;border:none;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;padding:10px 16px;border-radius:6px;cursor:pointer">{{ detailLabel }}</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ toggleDetail }}" style="position:fixed;inset:0;z-index:65;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end">
+      <div style="width:100%;background:#1F211C;border-top:1px solid #34362F;border-radius:14px 14px 0 0;padding:22px;margin-bottom:72px">
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #34362F"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:#C8B99A">Starting MSRP</span><span style="font-family:'Barlow Condensed',sans-serif;color:#F3EEE2">$69,990</span></div>
+        <sc-for list="{{ addOns }}" as="a" hint-placeholder-count="1"><div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0"><span style="font-size:13px;color:#C8B99A">{{ a.label }}</span><span style="font-family:'Barlow Condensed',sans-serif;color:#F3EEE2">{{ a.priceFmt }}</span></div></sc-for>
+        <div style="display:flex;justify-content:space-between;padding:12px 0 4px;border-top:1px solid #34362F"><span style="font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:#F3EEE2">Estimated Build Price</span><span style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#A9895D">{{ estimatedFmt }}</span></div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:860}}">
+class Component extends DCLogic {
+  // ----- Easy-to-update pricing & option data -----
+  // NOTE: induction cooktop price ($95) is intentionally isolated here so BRS can revise it easily.
+  static PRICES = {
+    base: 69990,
+    inverter: 950,
+    secondBattery: 2390,
+    heatedPerBattery: 375,
+    airConditioner: 2735,
+    inductionCooktop: 95, // <-- update this value if BRS revises induction pricing
+  };
+  static EXTERIOR = [
+    { id: 'bronze', label: 'Bronze', hex: '#7A5638' },
+    { id: 'silver', label: 'Silver', hex: '#B9BCBC' },
+    { id: 'tan',    label: 'Tan',    hex: '#C8B99A' },
+    { id: 'green',  label: 'Green',  hex: '#5F6B4F' },
+  ];
+  // Live Preview photography keyed by exterior id. Drop a file in here per finish to light up its preview.
+  static EXTERIOR_IMAGES = {
+    tan: 'assets/sherpa-tan.png',
+    silver: 'assets/sherpa-silver.png',
+    bronze: 'assets/sherpa-bronze.png',
+    green: 'assets/sherpa-green.png',
+  };
+  // Interior cabin shots shown in the Live Preview only on the Interior step, keyed by leather id.
+  static INTERIOR_IMAGES = {
+    'dark-brown': 'assets/interior-dark-brown.jpg',
+    'tan': 'assets/interior-tan.jpg',
+  };
+  // Shown in the Live Preview on the Kitchen step regardless of cooktop choice.
+  static KITCHEN_IMAGE = 'assets/kitchen-galley.png';
+  // Shown in the Live Preview on the Comfort step.
+  static COMFORT_IMAGE = 'assets/comfort-cabin.png';
+  // Shown in the Live Preview on the Tow step.
+  static TOW_IMAGE = 'assets/tow-hitch.png';
+  static LEATHER = [
+    { id: 'dark-brown', label: 'Dark Brown', hex: '#3B2A1D', texture: 'assets/leather-dark-brown.png', path: '/assets/sherpa/interior/leather-dark-brown.jpg' },
+    { id: 'tan',        label: 'Tan',        hex: '#B9986A', texture: 'assets/leather-tan.png', path: '/assets/sherpa/interior/leather-tan.jpg' },
+  ];
+  static STEPS = ['intro', 'exterior', 'interior', 'comfort', 'kitchen', 'power', 'tow', 'review', 'save'];
+
+  state = {
+    step: 'intro',
+    ext: 'tan',
+    leather: 'dark-brown',
+    inverter: false,
+    secondBattery: false,
+    heated: 0,            // 0, 1, or 2 batteries upgraded
+    ac: false,
+    kitchen: 'propane',   // 'propane' | 'induction'
+    trailer: 'standard',  // 'standard' | 'other'
+    showDetail: false,
+    submitted: null,      // null | 'email' | 'specialist' | 'dealer'
+    form: { first: '', last: '', email: '', phone: '', zip: '', contact: 'call', notes: '' },
+  };
+
+  money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  moneyCents(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  go(step) {
+    return () => { this.setState({ step, showDetail: false }); window.scrollTo(0, 0); };
+  }
+
+  chip(active, text) {
+    const style = active
+      ? { fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '.08em', fontSize: '12px', padding: '7px 13px', borderRadius: '5px', whiteSpace: 'nowrap', background: '#5F6B4F', color: '#F3EEE2', border: '1px solid #5F6B4F' }
+      : { fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '.08em', fontSize: '12px', padding: '7px 13px', borderRadius: '5px', whiteSpace: 'nowrap', background: 'transparent', color: '#C8B99A', border: '1px solid #34362F' };
+    return { style, text };
+  }
+
+  pill(active, disabled) {
+    if (disabled) return { fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '.06em', fontSize: '13px', padding: '10px 14px', borderRadius: '6px', cursor: 'not-allowed', background: '#16170F', color: '#5b5d53', border: '1px solid #34362F' };
+    return active
+      ? { fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '.06em', fontSize: '13px', padding: '10px 14px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(169,137,93,0.16)', color: '#F3EEE2', border: '1px solid #A9895D' }
+      : { fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '.06em', fontSize: '13px', padding: '10px 14px', borderRadius: '6px', cursor: 'pointer', background: '#1F211C', color: '#C8B99A', border: '1px solid #34362F' };
+  }
+
+  setHeated(n) {
+    return () => {
+      if (n === 2 && !this.state.secondBattery) return; // guard: 2 requires the second battery
+      this.setState({ heated: n });
+    };
+  }
+
+  setField(key) {
+    return (e) => this.setState({ form: { ...this.state.form, [key]: e.target.value } });
+  }
+  setContact(v) {
+    return () => this.setState({ form: { ...this.state.form, contact: v } });
+  }
+
+  submit(kind) {
+    return () => { this.setState({ submitted: kind }); window.scrollTo(0, 0); };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const P = Component.PRICES;
+    const ext = Component.EXTERIOR.find(o => o.id === s.ext) || Component.EXTERIOR[0];
+    const lea = Component.LEATHER.find(o => o.id === s.leather) || Component.LEATHER[0];
+    // Live Preview source: interior shot on the Interior step, exterior shot everywhere else.
+    const previewSrc = s.step === 'interior' ? Component.INTERIOR_IMAGES[s.leather]
+      : s.step === 'kitchen' ? Component.KITCHEN_IMAGE
+      : s.step === 'comfort' ? Component.COMFORT_IMAGE
+      : s.step === 'tow' ? Component.TOW_IMAGE
+      : Component.EXTERIOR_IMAGES[ext.id];
+    const heated = Math.min(s.heated, s.secondBattery ? 2 : 1);
+
+    // ----- add-ons -----
+    const addOns = [];
+    if (s.inverter) addOns.push({ label: 'KISAE 3000W Pure Sine Inverter', price: P.inverter });
+    if (s.secondBattery) addOns.push({ label: 'Second 270Ah GC3 LiFePO4 Battery', price: P.secondBattery });
+    if (heated > 0) addOns.push({ label: 'Heated Battery Upgrade (' + heated + ')', price: P.heatedPerBattery * heated });
+    if (s.ac) addOns.push({ label: 'Dometic Air Conditioner', price: P.airConditioner });
+    if (s.kitchen === 'induction') addOns.push({ label: 'SUMMIT Induction Cooktop', price: P.inductionCooktop });
+    const addOnsTotal = addOns.reduce((a, b) => a + b.price, 0);
+    const estimated = P.base + addOnsTotal;
+    const addOnsView = addOns.map(a => ({ label: a.label, priceFmt: '+' + this.moneyCents(a.price) }));
+
+    // ----- nav -----
+    const idx = Component.STEPS.indexOf(s.step);
+    const next = idx < Component.STEPS.length - 1 ? this.go(Component.STEPS[idx + 1]) : this.go('save');
+    const back = idx > 0 ? this.go(Component.STEPS[idx - 1]) : this.go('intro');
+    const nextLabel = s.step === 'tow' ? 'Review Build' : 'Continue';
+
+    // ----- progress -----
+    const pSteps = [['exterior', 'Exterior'], ['interior', 'Interior'], ['comfort', 'Comfort'], ['kitchen', 'Kitchen'], ['power', 'Power'], ['tow', 'Tow'], ['review', 'Review'], ['save', 'Save']];
+    const progress = pSteps.map((p, i) => {
+      const active = p[0] === s.step;
+      const done = Component.STEPS.indexOf(p[0]) < idx;
+      const bg = active ? '#A9895D' : 'transparent';
+      const fg = active ? '#0E0F0C' : done ? '#C8B99A' : '#6f7166';
+      const bc = active ? '#A9895D' : done ? '#5F6B4F' : '#34362F';
+      return {
+        n: String(i + 1).padStart(2, '0'),
+        label: p[1],
+        onClick: this.go(p[0]),
+        dotStyle: { width: '30px', height: '30px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed',sans-serif", fontSize: '13px', flexShrink: 0, background: bg, color: fg, border: '1px solid ' + bc, transition: 'all .15s' },
+        labelStyle: { fontFamily: "'Barlow Condensed',sans-serif", textTransform: 'uppercase', letterSpacing: '.08em', fontSize: '13px', color: active ? '#F3EEE2' : done ? '#C8B99A' : '#6f7166' },
+      };
+    });
+
+    // ----- summary -----
+    const powerParts = [];
+    if (s.inverter) powerParts.push('3000W Inverter');
+    if (s.secondBattery) powerParts.push('Second 270Ah Battery');
+    if (heated > 0) powerParts.push('Heated Upgrade (' + heated + ')');
+    const powerText = powerParts.length ? powerParts.join(' + ') : 'Standard power system';
+    const summaryRows = [
+      { label: 'Exterior', value: ext.label },
+      { label: 'Interior', value: lea.label + ' Leather' },
+      { label: 'Power', value: powerText },
+      { label: 'Climate', value: s.ac ? 'Dometic Air Conditioner' : 'No climate add-on' },
+      { label: 'Kitchen', value: s.kitchen === 'induction' ? 'SUMMIT Induction Cooktop' : 'Standard 2-Burner Propane' },
+      { label: 'Tow Setup', value: s.trailer === 'standard' ? 'Standard 7-Way Round RV' : 'Other / Needs confirmation' },
+    ];
+    const summaryRowsShort = [
+      { label: 'Exterior', value: ext.label },
+      { label: 'Interior', value: lea.label },
+      { label: 'Power', value: powerText },
+      { label: 'Kitchen', value: s.kitchen === 'induction' ? 'Induction' : 'Propane' },
+    ];
+
+    const recommend = s.ac || s.kitchen === 'induction';
+    const heavyPicks = [];
+    if (s.ac) heavyPicks.push('Dometic Air Conditioner');
+    if (s.kitchen === 'induction') heavyPicks.push('induction cooktop');
+    const powerRecText = heavyPicks.length ? 'Recommended if you selected the ' + heavyPicks.join(' and ') : '';
+
+    const confirmMap = {
+      email: { title: 'Build Saved', body: 'Thanks! Your Sherpa Gen 3 build sheet is on its way to your inbox and our team has your details.' },
+      specialist: { title: "We'll Be In Touch", body: 'A BRS Offroad Sherpa specialist will reach out shortly to walk through your build.' },
+      dealer: { title: 'Dealer Notified', body: 'Your closest BRS Offroad dealer will contact you using your preferred contact method.' },
+    };
+    const confirm = confirmMap[s.submitted] || confirmMap.email;
+
+    const inv = this.chip(s.inverter, s.inverter ? 'Added' : 'Add');
+    const sb = this.chip(s.secondBattery, s.secondBattery ? 'Added' : 'Add');
+    const acc = this.chip(s.ac, s.ac ? 'Added' : 'Add');
+    const prop = this.chip(s.kitchen === 'propane', s.kitchen === 'propane' ? 'Selected' : 'Select');
+    const ind = this.chip(s.kitchen === 'induction', s.kitchen === 'induction' ? 'Selected' : 'Select');
+
+    return {
+      // step flags
+      building: s.step !== 'intro',
+      isIntro: s.step === 'intro',
+      isConfig: ['exterior', 'interior', 'power', 'comfort', 'kitchen', 'tow'].includes(s.step),
+      isExterior: s.step === 'exterior',
+      isInterior: s.step === 'interior',
+      isPower: s.step === 'power',
+      isComfort: s.step === 'comfort',
+      isKitchen: s.step === 'kitchen',
+      isTow: s.step === 'tow',
+      isReview: s.step === 'review',
+      isSave: s.step === 'save',
+      notSubmitted: !s.submitted,
+      submitted: !!s.submitted,
+
+      // nav
+      start: this.go('exterior'),
+      next, back, nextLabel,
+      progress,
+
+      // preview
+      previewWash: 'radial-gradient(58% 46% at 50% 60%, ' + ext.hex + '66, transparent 72%)',
+      previewAsset: '/assets/sherpa/exterior/' + ext.id + '.png',
+      hasPreviewImg: !!previewSrc,
+      noPreviewImg: !previewSrc,
+      previewImgUrl: previewSrc ? 'url("' + previewSrc + '")' : 'none',
+      reviewExtUrl: Component.EXTERIOR_IMAGES[ext.id] ? 'url("' + Component.EXTERIOR_IMAGES[ext.id] + '")' : 'none',
+      reviewIntUrl: Component.INTERIOR_IMAGES[s.leather] ? 'url("' + Component.INTERIOR_IMAGES[s.leather] + '")' : 'none',
+      extLabel: ext.label,
+      leatherLabel: lea.label,
+      extSwatchStyle: 'background:' + ext.hex,
+      leatherSwatchStyle: lea.texture ? 'background:' + lea.hex + ' url("' + lea.texture + '") center/cover no-repeat' : 'background:' + lea.hex,
+
+      // exterior / interior
+      exteriorOpts: Component.EXTERIOR.map(o => ({
+        label: o.label, selected: o.id === s.ext, onSelect: () => this.setState({ ext: o.id }),
+        swatchStyle: o.id === 'silver' ? 'background:#cccccc' : 'background:linear-gradient(135deg, ' + o.hex + ' 0%, ' + o.hex + 'cc 60%, ' + o.hex + '88 100%)',
+      })),
+      leatherOpts: Component.LEATHER.map(o => ({
+        label: o.label, path: o.path, selected: o.id === s.leather, onSelect: () => this.setState({ leather: o.id }),
+        swatchStyle: o.texture ? 'background:' + o.hex + ' url("' + o.texture + '") center/cover no-repeat' : 'background:' + o.hex,
+      })),
+
+      // power
+      toggleInverter: () => this.setState({ inverter: !s.inverter }),
+      inverterSel: s.inverter, inverterChip: inv.style, inverterChipText: inv.text,
+      toggleSecondBattery: () => this.setState(st => ({ secondBattery: !st.secondBattery, heated: !st.secondBattery ? st.heated : Math.min(st.heated, 1) })),
+      secondBatterySel: s.secondBattery, secondBatteryChip: sb.style, secondBatteryChipText: sb.text,
+      onHeated0: this.setHeated(0), onHeated1: this.setHeated(1), onHeated2: this.setHeated(2),
+      heated0Style: this.pill(heated === 0, false),
+      heated1Style: this.pill(heated === 1, false),
+      heated2Style: this.pill(heated === 2, !s.secondBattery),
+      heated2Locked: !s.secondBattery,
+
+      // comfort
+      toggleAC: () => this.setState({ ac: !s.ac }),
+      acSel: s.ac, acChip: acc.style, acChipText: acc.text,
+
+      // kitchen
+      setPropane: () => this.setState({ kitchen: 'propane' }),
+      setInduction: () => this.setState({ kitchen: 'induction' }),
+      propaneSel: s.kitchen === 'propane', propaneChip: prop.style, propaneChipText: prop.text,
+      inductionSel: s.kitchen === 'induction', inductionChip: ind.style, inductionChipText: ind.text,
+
+      // tow
+      setTrailerStd: () => this.setState({ trailer: 'standard' }),
+      setTrailerOther: () => this.setState({ trailer: 'other' }),
+      trailerStdSel: s.trailer === 'standard',
+      trailerOtherSel: s.trailer === 'other',
+
+      // recommendation
+      recommend,
+      showPowerRec: recommend,
+      powerRecText,
+
+      // pricing
+      estimatedFmt: this.money(estimated),
+      addOnsTotalSigned: addOnsTotal > 0 ? '+' + this.money(addOnsTotal) : '$0',
+      addOns: addOnsView,
+      hasAddOns: addOns.length > 0,
+
+      // review / save
+      summaryRows, summaryRowsShort,
+      form: s.form,
+      onFirst: this.setField('first'), onLast: this.setField('last'), onEmail: this.setField('email'),
+      onPhone: this.setField('phone'), onZip: this.setField('zip'), onNotes: this.setField('notes'),
+      onContactCall: this.setContact('call'), onContactText: this.setContact('text'), onContactEmail: this.setContact('email'),
+      contactCallStyle: this.pill(s.form.contact === 'call', false),
+      contactTextStyle: this.pill(s.form.contact === 'text', false),
+      contactEmailStyle: this.pill(s.form.contact === 'email', false),
+      submitEmail: this.submit('email'),
+      submitSpecialist: this.submit('specialist'),
+      submitDealer: this.submit('dealer'),
+      restart: () => { this.setState({ step: 'intro', submitted: null }); window.scrollTo(0, 0); },
+      confirmTitle: confirm.title, confirmBody: confirm.body,
+
+      // mobile price drawer
+      showDetail: s.showDetail,
+      toggleDetail: () => this.setState({ showDetail: !s.showDetail }),
+      detailLabel: s.showDetail ? 'Hide' : 'View Build Price',
+    };
+  }
+}
+</script>
+</body>
+</html>
